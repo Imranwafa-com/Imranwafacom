@@ -2,7 +2,7 @@
 
 An interactive, iMessage-style personal portfolio website built with Next.js, TypeScript, and Tailwind CSS. Features animated message sequences, a functional contact form with email delivery, rate limiting, and dark mode support.
 
-![Portfolio Preview](./public/preview.png)
+![Portfolio Preview](./portfolio/public/preview.png)
 
 ## Features
 
