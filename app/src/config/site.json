@@ -10,7 +10,7 @@
     },
     "meta": {
         "title": "Imran Wafa",
-        "description": "Imran Wafa, Builder, developer, and creative technologist. Explore my work and get in touch.",
+        "description": "Imran Wafa, Builder, developer, Data analyst and creative technologist. Explore my work and get in touch.",
         "themeColor": "#0a0a0f"
     },
     "hero": {
@@ -19,6 +19,7 @@
             "I build things.",
             "I design experiences.",
             "I write clean code.",
+            "I turn numbers into solutions.",
             "I solve problems."
         ],
         "ctaPrimary": {
@@ -35,8 +36,8 @@
         "heading": "Things I've Built",
         "projects": [
             {
-                "title": "WorkNetFlow",
-                "description": "AI-powered browser with workflow automation and intelligent browsing capabilities.",
+                "title": "FloUwer",
+                "description": "AI-powered (LLM and vision) browser with workflow automation and intelligent browsing capabilities.",
                 "tags": [
                     "Electron",
                     "React",
@@ -48,7 +49,7 @@
             },
             {
                 "title": "Portfolio Site",
-                "description": "The site you're on right now, built with React, Framer Motion, and a unique iMessage contact experience.",
+                "description": "The site you're on right now, built with React, Framer Motion, and a couple easter eggs :).",
                 "tags": [
                     "React",
                     "Framer Motion",
@@ -58,8 +59,8 @@
                 "accent": "#c678dd"
             },
             {
-                "title": "JobBot",
-                "description": "Automated job application assistant with smart resume tailoring and tracking.",
+                "title": "JabBit",
+                "description": "Single page workflow automation extension for chromium based browsers.",
                 "tags": [
                     "Python",
                     "Automation",
@@ -102,9 +103,9 @@
         "heading": "Hey, I'm",
         "headingHighlight": "Imran",
         "bio": [
-            "I'm a developer who's passionate about building things that matter. I believe the best software is built at the intersection of thoughtful design and solid engineering, and that's where I like to live.",
-            "When I'm not coding, you'll find me exploring new technologies, contributing to open-source projects, or figuring out how to automate something that probably didn't need to be automated (but it's cooler now).",
-            "I care about the craft. Every pixel, every animation, every line of code. The details are what make something feel <em>right</em>."
+            "I am a data analyst and developer who loves creating things that matter. I believe the best software is built at the intersection of thoughtful design and solid engineering, and that's where I like to live.",
+            "When I'm not coding, you'll find me messing with hardware, tearing down a engine, or figuring out how to automate something that probably didn't need to be automated (but it's cooler now).",
+            "I care about the craft. Every pixel, every excel row, every animation, every line of code. The details are what make something feel <em>right</em>."
         ],
         "skills": [
             {
@@ -142,34 +143,41 @@
             },
             {
                 "icon": "Globe",
-                "label": "Tools & Ops",
+                "label": "Data & AI",
                 "items": [
-                    "Git",
-                    "Docker",
-                    "Linux",
-                    "CI/CD",
-                    "Vercel"
+                    "Python",
+                    "Data Analysis",
+                    "Machine Learning",
+                    "AI",
+                    "LLMs"
                 ]
             }
         ],
         "timeline": [
             {
                 "icon": "Briefcase",
-                "title": "Building & Experimenting",
-                "subtitle": "Full-Stack Developer",
-                "period": "Present",
-                "description": "Creating products, tools, and experiences that push the boundaries of what's possible on the web."
-            },
-            {
-                "icon": "Briefcase",
-                "title": "Freelance & Open Source",
-                "subtitle": "Developer",
-                "period": "2024 - Present",
-                "description": "Building tools and contributing to projects while learning and growing as a developer."
+                "title": "Data Analyst",
+                "subtitle": "Data analytics/Automation - Instawire LLC",
+                "period": "2021 - 2024",
+                "description": "Creating Graphs, charts, and other data visualizations to help businesses make better decisions."
             },
             {
                 "icon": "GraduationCap",
-                "title": "Computer Science",
+                "title": "Data and Dev Certifications",
+                "subtitle": "Google, AWS, Comptia and others",
+                "period": "2021 - Present",
+                "description": "Completed various certifications in data analytics and development to enhance my skills and knowledge."
+            },
+            {
+                "icon": "Briefcase",
+                "title": "Data Analyst",
+                "subtitle": "Data Entry - MGT Well",
+                "period": "2020 - 2021",
+                "description": "Created different types of data on different mediums to get greater qualtiy data."
+            },
+            {
+                "icon": "GraduationCap",
+                "title": "Comp Sci B.S.",
                 "subtitle": "Student",
                 "period": "Ongoing",
                 "description": "Studying the fundamentals while applying them to real-world projects and challenges."
@@ -189,8 +197,8 @@
         ],
         "items": [
             {
-                "title": "WorkNetFlow",
-                "description": "AI-powered browser with workflow automation and intelligent browsing.",
+                "title": "FloUwer",
+                "description": "AI-powered (LLM and vision) browser with workflow automation and intelligent browsing capabilities.",
                 "longDescription": "An Electron-based browser that records user workflows, replays them with AI intelligence, and supports multiple LLM providers for smart automation.",
                 "tags": [
                     "Electron",
@@ -206,7 +214,7 @@
             },
             {
                 "title": "ImranWafa.com",
-                "description": "This portfolio site with an iMessage-style contact experience.",
+                "description": "The site you're on right now, built with React, Framer Motion, and a couple easter eggs :).",
                 "longDescription": "A personal portfolio built with React and Framer Motion, featuring a unique iMessage-based contact page, smooth page transitions, and rich scroll-triggered animations.",
                 "tags": [
                     "React",
@@ -220,9 +228,9 @@
                 "github": "https://github.com/imranwafa-com"
             },
             {
-                "title": "JobBot",
-                "description": "Automated job application assistant with smart resume tailoring.",
-                "longDescription": "A Python-based automation tool that streamlines job applications by auto-tailoring resumes, tracking applications, and managing the entire job search pipeline.",
+                "title": "JabBit",
+                "description": "Single page workflow automation extension for chromium based browsers.",
+                "longDescription": "An automation tool that streamlines workflows by auto-filling forms, and managing the entire workflow.",
                 "tags": [
                     "Python",
                     "Automation",
@@ -235,14 +243,14 @@
                 "github": "https://github.com/imranwafa-com"
             },
             {
-                "title": "AI Chat Interface",
-                "description": "Real-time chat UI powered by multiple LLM providers.",
-                "longDescription": "A sleek conversational interface supporting OpenAI, Groq, and other LLM APIs with streaming responses, conversation history, and context management.",
+                "title": "miLoader",
+                "description": "Real-time resource load manager for macOS.",
+                "longDescription": "A lightweight macOS daemon that monitors system resources in real time and uses machine learning to predict usage spikes before they happen — automatically rebalancing memory allocation and throttling runaway processes to keep your machine responsive.",
                 "tags": [
-                    "React",
-                    "OpenAI",
-                    "Streaming",
-                    "WebSockets"
+                    "C++",
+                    "AI",
+                    "Memory Management",
+                    "macOS"
                 ],
                 "category": "AI/ML",
                 "color": "from-cyan-500/20 to-blue-500/20",
@@ -293,11 +301,11 @@
             },
             {
                 "text": "I'm Imran",
-                "delay": 2500
+                "delay": 2200
             },
             {
                 "text": "I build things",
-                "delay": 4200
+                "delay": 4000
             }
         ],
         "linksMessage": "Here are some places you can find me.",
