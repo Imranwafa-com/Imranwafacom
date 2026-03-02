@@ -9,6 +9,7 @@ import AboutPage from './pages/AboutPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ContactPage from './pages/ContactPage';
 import config from './lib/config';
+import { SpeedInsights } from "@vercel/speed-insights/react"
 
 function ScrollToTop() {
   const { pathname } = useLocation();
