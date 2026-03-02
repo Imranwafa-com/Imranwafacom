@@ -1,0 +1,375 @@
+{
+    "personal": {
+        "name": "Imran Wafa",
+        "firstName": "Imran",
+        "logo": "IW",
+        "tagline": "Builder, developer, and creative technologist",
+        "email": "imran@imranwafa.com",
+        "github": "https://github.com/imranwafa-com",
+        "githubHandle": "imranwafa-com"
+    },
+    "meta": {
+        "title": "Imran Wafa",
+        "description": "Imran Wafa, Builder, developer, and creative technologist. Explore my work and get in touch.",
+        "themeColor": "#0a0a0f"
+    },
+    "hero": {
+        "greeting": "Welcome to my corner of the internet",
+        "rotatingTitles": [
+            "I build things.",
+            "I design experiences.",
+            "I write clean code.",
+            "I solve problems."
+        ],
+        "ctaPrimary": {
+            "text": "View My Work",
+            "link": "/projects"
+        },
+        "ctaSecondary": {
+            "text": "Get In Touch",
+            "link": "/contact"
+        }
+    },
+    "featuredWork": {
+        "sectionLabel": "Featured Work",
+        "heading": "Things I've Built",
+        "projects": [
+            {
+                "title": "WorkNetFlow",
+                "description": "AI-powered browser with workflow automation and intelligent browsing capabilities.",
+                "tags": [
+                    "Electron",
+                    "React",
+                    "TypeScript",
+                    "AI"
+                ],
+                "color": "from-blue-500/20 to-purple-500/20",
+                "accent": "#007AFF"
+            },
+            {
+                "title": "Portfolio Site",
+                "description": "The site you're on right now, built with React, Framer Motion, and a unique iMessage contact experience.",
+                "tags": [
+                    "React",
+                    "Framer Motion",
+                    "Tailwind"
+                ],
+                "color": "from-purple-500/20 to-pink-500/20",
+                "accent": "#c678dd"
+            },
+            {
+                "title": "JobBot",
+                "description": "Automated job application assistant with smart resume tailoring and tracking.",
+                "tags": [
+                    "Python",
+                    "Automation",
+                    "AI"
+                ],
+                "color": "from-green-500/20 to-cyan-500/20",
+                "accent": "#98c379"
+            }
+        ]
+    },
+    "quickAbout": {
+        "sectionLabel": "About Me",
+        "heading": "A Quick",
+        "headingHighlight": "Introduction",
+        "paragraphs": [
+            "I'm a developer and builder who loves creating things that live at the intersection of design and technology. I care deeply about the details, from pixel-perfect UIs to clean, maintainable code.",
+            "Whether it's automating workflows with AI, building beautiful web experiences, or experimenting with new technologies, I'm always looking for the next thing to build."
+        ],
+        "skills": [
+            {
+                "label": "Languages",
+                "value": "TypeScript, Python, Java"
+            },
+            {
+                "label": "Frontend",
+                "value": "React, Next.js, Tailwind"
+            },
+            {
+                "label": "Backend",
+                "value": "Node.js, Express, REST"
+            },
+            {
+                "label": "Tools",
+                "value": "Git, Docker, Figma"
+            }
+        ]
+    },
+    "about": {
+        "sectionLabel": "About Me",
+        "heading": "Hey, I'm",
+        "headingHighlight": "Imran",
+        "bio": [
+            "I'm a developer who's passionate about building things that matter. I believe the best software is built at the intersection of thoughtful design and solid engineering, and that's where I like to live.",
+            "When I'm not coding, you'll find me exploring new technologies, contributing to open-source projects, or figuring out how to automate something that probably didn't need to be automated (but it's cooler now).",
+            "I care about the craft. Every pixel, every animation, every line of code. The details are what make something feel <em>right</em>."
+        ],
+        "skills": [
+            {
+                "icon": "Code",
+                "label": "Frontend",
+                "items": [
+                    "React",
+                    "TypeScript",
+                    "Next.js",
+                    "Tailwind CSS",
+                    "Framer Motion"
+                ]
+            },
+            {
+                "icon": "Cpu",
+                "label": "Backend",
+                "items": [
+                    "Node.js",
+                    "Python",
+                    "Express",
+                    "REST APIs",
+                    "PostgreSQL"
+                ]
+            },
+            {
+                "icon": "Palette",
+                "label": "Design",
+                "items": [
+                    "Figma",
+                    "UI/UX",
+                    "Prototyping",
+                    "Design Systems",
+                    "Animation"
+                ]
+            },
+            {
+                "icon": "Globe",
+                "label": "Tools & Ops",
+                "items": [
+                    "Git",
+                    "Docker",
+                    "Linux",
+                    "CI/CD",
+                    "Vercel"
+                ]
+            }
+        ],
+        "timeline": [
+            {
+                "icon": "Briefcase",
+                "title": "Building & Experimenting",
+                "subtitle": "Full-Stack Developer",
+                "period": "Present",
+                "description": "Creating products, tools, and experiences that push the boundaries of what's possible on the web."
+            },
+            {
+                "icon": "Briefcase",
+                "title": "Freelance & Open Source",
+                "subtitle": "Developer",
+                "period": "2024 - Present",
+                "description": "Building tools and contributing to projects while learning and growing as a developer."
+            },
+            {
+                "icon": "GraduationCap",
+                "title": "Computer Science",
+                "subtitle": "Student",
+                "period": "Ongoing",
+                "description": "Studying the fundamentals while applying them to real-world projects and challenges."
+            }
+        ]
+    },
+    "projects": {
+        "sectionLabel": "Projects",
+        "heading": "Things I've",
+        "headingHighlight": "Built",
+        "description": "A collection of projects that showcase my work in web development, AI, and developer tooling.",
+        "categories": [
+            "All",
+            "Web",
+            "AI/ML",
+            "Tools"
+        ],
+        "items": [
+            {
+                "title": "WorkNetFlow",
+                "description": "AI-powered browser with workflow automation and intelligent browsing.",
+                "longDescription": "An Electron-based browser that records user workflows, replays them with AI intelligence, and supports multiple LLM providers for smart automation.",
+                "tags": [
+                    "Electron",
+                    "React",
+                    "TypeScript",
+                    "AI",
+                    "Node.js"
+                ],
+                "category": "AI/ML",
+                "color": "from-blue-500/20 to-indigo-500/20",
+                "accent": "#007AFF",
+                "github": "https://github.com/imranwafa-com"
+            },
+            {
+                "title": "ImranWafa.com",
+                "description": "This portfolio site with an iMessage-style contact experience.",
+                "longDescription": "A personal portfolio built with React and Framer Motion, featuring a unique iMessage-based contact page, smooth page transitions, and rich scroll-triggered animations.",
+                "tags": [
+                    "React",
+                    "Framer Motion",
+                    "Tailwind",
+                    "TypeScript"
+                ],
+                "category": "Web",
+                "color": "from-purple-500/20 to-pink-500/20",
+                "accent": "#c678dd",
+                "github": "https://github.com/imranwafa-com"
+            },
+            {
+                "title": "JobBot",
+                "description": "Automated job application assistant with smart resume tailoring.",
+                "longDescription": "A Python-based automation tool that streamlines job applications by auto-tailoring resumes, tracking applications, and managing the entire job search pipeline.",
+                "tags": [
+                    "Python",
+                    "Automation",
+                    "AI",
+                    "CLI"
+                ],
+                "category": "Tools",
+                "color": "from-green-500/20 to-emerald-500/20",
+                "accent": "#98c379",
+                "github": "https://github.com/imranwafa-com"
+            },
+            {
+                "title": "AI Chat Interface",
+                "description": "Real-time chat UI powered by multiple LLM providers.",
+                "longDescription": "A sleek conversational interface supporting OpenAI, Groq, and other LLM APIs with streaming responses, conversation history, and context management.",
+                "tags": [
+                    "React",
+                    "OpenAI",
+                    "Streaming",
+                    "WebSockets"
+                ],
+                "category": "AI/ML",
+                "color": "from-cyan-500/20 to-blue-500/20",
+                "accent": "#56b6c2"
+            },
+            {
+                "title": "Component Library",
+                "description": "A curated set of reusable React components with animations.",
+                "longDescription": "Design system and component library featuring accessible, animated components built with Radix UI primitives and Framer Motion.",
+                "tags": [
+                    "React",
+                    "Radix UI",
+                    "Storybook",
+                    "Design System"
+                ],
+                "category": "Web",
+                "color": "from-orange-500/20 to-red-500/20",
+                "accent": "#e06c75"
+            },
+            {
+                "title": "CLI Toolkit",
+                "description": "Developer productivity tools for the command line.",
+                "longDescription": "A collection of CLI utilities for common development tasks including scaffolding, code generation, and project management.",
+                "tags": [
+                    "Node.js",
+                    "CLI",
+                    "TypeScript",
+                    "npm"
+                ],
+                "category": "Tools",
+                "color": "from-yellow-500/20 to-orange-500/20",
+                "accent": "#e5c07b"
+            }
+        ]
+    },
+    "contact": {
+        "heading": "Let's",
+        "headingHighlight": "Talk",
+        "subtext": "Drop me a message  (it works just like iMessage)",
+        "footerText": "Built with React & Framer Motion • Messages are stored locally and sent to my email"
+    },
+    "chat": {
+        "contactName": "Imran Wafa",
+        "introMessages": [
+            {
+                "text": "Hi",
+                "delay": 800
+            },
+            {
+                "text": "I'm Imran",
+                "delay": 2500
+            },
+            {
+                "text": "I build things",
+                "delay": 4200
+            }
+        ],
+        "linksMessage": "Here are some places you can find me.",
+        "linkPreviews": [
+            {
+                "url": "https://www.linkedin.com/in/imran-w-9741082a3",
+                "title": "LinkedIn",
+                "description": "Connect with me professionally and view my experience.",
+                "domain": "linkedin.com",
+                "icon": "linkedin"
+            },
+            {
+                "url": "https://github.com/imranwafa-com",
+                "title": "GitHub",
+                "description": "Check out my code, projects, and open source contributions.",
+                "domain": "github.com",
+                "icon": "github"
+            },
+            {
+                "url": "mailto:contact@imranwafa.com",
+                "title": "Email",
+                "description": "Send me a direct message for inquiries or collaborations.",
+                "domain": "email",
+                "icon": "mail"
+            }
+        ],
+        "emailAskPhrases": [
+            "what's your email so I can get back to you?",
+            "drop your email so I can reply",
+            "what email should I reach you at?",
+            "send me your email and I'll follow up"
+        ],
+        "emailConfirmPhrases": [
+            "got it, sending your message now…",
+            "perfect, forwarding that along…",
+            "noted, I'll get back to you there",
+            "saved, sending your message"
+        ],
+        "genericResponses": [
+            "Got it, Ill be back with you ASAP",
+            "received, give me a minute to review",
+            "Sent, let me check it rq"
+        ]
+    },
+    "socialLinks": [
+        {
+            "platform": "GitHub",
+            "icon": "github",
+            "url": "https://github.com/imranwafa-com"
+        },
+        {
+            "platform": "LinkedIn",
+            "icon": "linkedin",
+            "url": "https://www.linkedin.com/in/imran-w-9741082a3"
+        },
+        {
+            "platform": "Email",
+            "icon": "mail",
+            "url": "mailto:contact@imranwafa.com"
+        }
+    ],
+    "footer": {
+        "tagline": "Built with React, Framer Motion & a lot of coffee",
+        "copyright": "Imran Wafa. All rights reserved."
+    },
+    "easterEgg": {
+        "consoleGreeting": "Hey there, curious dev!",
+        "consoleMessage": "Looking at my code? No worries it's all open source!",
+        "consoleTech": "Built with React + TypeScript + Framer Motion + coffee",
+        "consoleRecruiter": "If you're a recruiter... yes, I wrote this myself ",
+        "overlayTitle": "Peeking at my code?",
+        "overlayMessage": "No worries it's all open source!\nCheck out the full repo below ",
+        "overlayButtonText": "View on GitHub"
+    }
+}

@@ -34,6 +34,7 @@ export interface ChatState {
 
 export interface ContactFormData {
   message: string;
+  senderEmail?: string;
   timestamp: string;
   userAgent: string;
 }

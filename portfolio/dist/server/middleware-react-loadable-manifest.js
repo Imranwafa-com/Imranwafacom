@@ -1,1 +1,0 @@
-self.__REACT_LOADABLE_MANIFEST="{\"app/page.tsx -> @/components/ChatContainer\":{\"id\":\"app/page.tsx -> @/components/ChatContainer\",\"files\":[\"static/chunks/_app-pages-browser_src_components_ChatContainer_tsx.js\"]}}"

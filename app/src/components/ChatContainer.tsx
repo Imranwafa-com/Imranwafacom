@@ -6,56 +6,35 @@ import TypingIndicator from './TypingIndicator';
 import InputBar from './InputBar';
 import RestartButton from './RestartButton';
 import type { Message, LinkPreview } from '../lib/types';
-import { 
-  generateId, 
-  formatDate, 
-  getRelativeTimeString, 
+import {
+  generateId,
+  formatDate,
+  getRelativeTimeString,
   getRandomCTAPhrase,
   getRandomRefreshWelcomePhrase,
   getRandomFollowUpPhrase,
 } from '../lib/utils';
+import { trackContactMessage, trackContactEmail } from '../lib/analytics';
+import { playSendSound, playReceiveSound } from '../lib/sounds';
+import config from '../lib/config';
 
-const INTRO_MESSAGES = [
-  { text: 'Hi', delay: 800 },
-  { text: "I'm Imran", delay: 2500 },
-  { text: 'i build things', delay: 4200 },
-];
+const INTRO_MESSAGES = config.chat.introMessages;
 
-const LINKS_MESSAGE = 'Here are some places you can find me.';
+const LINKS_MESSAGE = config.chat.linksMessage;
 
-const LINK_PREVIEWS: LinkPreview[] = [
-  {
-    url: 'https://linkedin.com/in/imranwafa',
-    title: 'LinkedIn',
-    description: 'Connect with me professionally and view my experience.',
-    domain: 'linkedin.com',
-    icon: 'linkedin',
-  },
-  {
-    url: 'https://github.com/imranwafa',
-    title: 'GitHub',
-    description: 'Check out my code, projects, and open source contributions.',
-    domain: 'github.com',
-    icon: 'github',
-  },
-  {
-    url: 'mailto:imran@example.com',
-    title: 'Email',
-    description: 'Send me a direct message for inquiries or collaborations.',
-    domain: 'email',
-    icon: 'mail',
-  },
-];
+const LINK_PREVIEWS = config.chat.linkPreviews as LinkPreview[];
 
-const GENERIC_RESPONSES = [
-  'Got it, ill be back with you ASAP',
-  'received, give me a minute to review',
-  'Sent, let me check it rq',
-];
+const EMAIL_ASK_PHRASES = config.chat.emailAskPhrases;
+
+const EMAIL_CONFIRM_PHRASES = config.chat.emailConfirmPhrases;
+
+const GENERIC_RESPONSES = config.chat.genericResponses;
+
 
 const STORAGE_KEY = 'imran-portfolio-messages';
 const SESSION_KEY = 'imran-portfolio-session';
 const CTA_KEY = 'imran-portfolio-cta';
+const EMAIL_KEY = 'imran-portfolio-sender-email';
 
 interface StoredMessage {
   id: string;
@@ -73,6 +52,9 @@ export default function ChatContainer() {
   const [isTyping, setIsTyping] = useState(false);
   const [showRestart, setShowRestart] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [inputMode, setInputMode] = useState<'message' | 'email'>('message');
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  const [senderEmail, setSenderEmail] = useState<string>('');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_ctaPhrase, setCtaPhrase] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -80,9 +62,17 @@ export default function ChatContainer() {
   // Load messages from localStorage on mount
   useEffect(() => {
     const storedMessages = localStorage.getItem(STORAGE_KEY);
-    const sessionId = localStorage.getItem(SESSION_KEY);
     const storedCTA = localStorage.getItem(CTA_KEY);
-    const currentSessionId = Date.now().toString();
+    const storedEmail = localStorage.getItem(EMAIL_KEY);
+
+    // Use sessionStorage for session tracking so navigating between pages
+    // doesn't trigger "return visit" messages — only actual page refreshes do.
+    const sessionVisited = sessionStorage.getItem(SESSION_KEY);
+    const isNewSession = !sessionVisited;
+
+    if (storedEmail) {
+      setSenderEmail(storedEmail);
+    }
 
     const loadMessages = () => {
       if (storedMessages) {
@@ -93,9 +83,9 @@ export default function ChatContainer() {
             timestamp: new Date(m.timestamp),
           }));
 
-          // Check if this is a new session (refresh)
-          if (sessionId !== currentSessionId) {
-            // New session - add separator and welcome messages
+          // Only show return-visit messages on actual new sessions (page refresh),
+          // NOT on in-app navigation between routes.
+          if (isNewSession) {
             const lastMessage = loadedMessages[loadedMessages.length - 1];
             const separatorMessage: Message = {
               id: generateId(),
@@ -129,11 +119,11 @@ export default function ChatContainer() {
 
             setMessages(updatedMessages);
             saveMessages(updatedMessages);
-            setShowRestart(true);
           } else {
             setMessages(loadedMessages);
-            setShowRestart(true);
           }
+
+          setShowRestart(true);
 
           // Restore or generate CTA phrase
           if (storedCTA) {
@@ -144,7 +134,6 @@ export default function ChatContainer() {
             localStorage.setItem(CTA_KEY, newCTA);
           }
         } catch {
-          // If parsing fails, start fresh
           startIntroSequence();
         }
       } else {
@@ -152,8 +141,8 @@ export default function ChatContainer() {
         startIntroSequence();
       }
 
-      // Set session ID
-      localStorage.setItem(SESSION_KEY, currentSessionId);
+      // Mark this session as visited (persists across in-app navigation)
+      sessionStorage.setItem(SESSION_KEY, 'true');
     };
 
     loadMessages();
@@ -174,7 +163,6 @@ export default function ChatContainer() {
   };
 
   const startIntroSequence = useCallback(() => {
-    // Generate and save CTA phrase
     const newCTA = getRandomCTAPhrase();
     setCtaPhrase(newCTA);
     localStorage.setItem(CTA_KEY, newCTA);
@@ -183,7 +171,6 @@ export default function ChatContainer() {
 
     const showNextMessage = () => {
       if (messageIndex >= INTRO_MESSAGES.length) {
-        // Show links message after intro
         setTimeout(() => {
           setIsTyping(true);
           setTimeout(() => {
@@ -200,7 +187,6 @@ export default function ChatContainer() {
               return updated;
             });
 
-            // Show CTA message after links
             setTimeout(() => {
               setIsTyping(true);
               setTimeout(() => {
@@ -216,6 +202,7 @@ export default function ChatContainer() {
                   saveMessages(updated);
                   return updated;
                 });
+                setShowRestart(true);
               }, 900);
             }, 1500);
           }, 800);
@@ -247,13 +234,61 @@ export default function ChatContainer() {
       }, message.delay - (messageIndex > 0 ? INTRO_MESSAGES[messageIndex - 1].delay : 0));
     };
 
+    // Mark session as visited when starting intro too
+    sessionStorage.setItem(SESSION_KEY, 'true');
     showNextMessage();
   }, []);
+
+  const addBotMessage = useCallback((text: string, delay = 500, typingDuration = 800) => {
+    setTimeout(() => {
+      setIsTyping(true);
+      setTimeout(() => {
+        setIsTyping(false);
+        playReceiveSound();
+        const msg: Message = {
+          id: generateId(),
+          text,
+          isUser: false,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => {
+          const updated = [...prev, msg];
+          saveMessages(updated);
+          return updated;
+        });
+      }, typingDuration);
+    }, delay);
+  }, []);
+
+  const sendToApi = useCallback(async (text: string, email: string) => {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          senderEmail: email,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const aiResponse = data.aiResponse?.response || "thanks! i'll get back to you soon";
+        addBotMessage(aiResponse, 500, 1200);
+      } else {
+        throw new Error('Failed');
+      }
+    } catch {
+      const genericResponse = GENERIC_RESPONSES[Math.floor(Math.random() * GENERIC_RESPONSES.length)];
+      addBotMessage(genericResponse);
+    }
+  }, [addBotMessage]);
 
   const handleSendMessage = async (text: string) => {
     if (isSending) return;
 
-    // Add user message
+    // Add user message bubble
     const userMessage: Message = {
       id: generateId(),
       text,
@@ -267,25 +302,25 @@ export default function ChatContainer() {
       saveMessages(updated);
       return updated;
     });
-    setIsSending(true);
 
-    try {
-      // Send to backend
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: text,
-          timestamp: new Date().toISOString(),
-        }),
-      });
+    // Sound + analytics
+    playSendSound();
+    trackContactMessage(text);
 
-      if (response.ok) {
-        const data = await response.json();
+    // Check if we have the sender's email
+    if (!senderEmail) {
+      // No email yet — save message, ask for email
+      setPendingMessage(text);
+      setInputMode('email');
 
-        // Update message status to delivered
+      const askPhrase = EMAIL_ASK_PHRASES[Math.floor(Math.random() * EMAIL_ASK_PHRASES.length)];
+      addBotMessage(askPhrase, 500, 900);
+    } else {
+      // Email already saved — send immediately
+      setIsSending(true);
+
+      // Mark as delivered
+      setTimeout(() => {
         setMessages((prev) => {
           const updated = prev.map((msg) =>
             msg.id === userMessage.id ? { ...msg, status: 'delivered' as const } : msg
@@ -293,51 +328,46 @@ export default function ChatContainer() {
           saveMessages(updated);
           return updated;
         });
+      }, 300);
 
-        // Show AI response after a delay
-        setTimeout(() => {
-          setIsTyping(true);
-          setTimeout(() => {
-            setIsTyping(false);
-            const aiResponse = data.aiResponse?.response || "thanks! i'll get back to you soon";
-            const replyMessage: Message = {
-              id: generateId(),
-              text: aiResponse,
-              isUser: false,
-              timestamp: new Date(),
-            };
-            setMessages((prev) => {
-              const updated = [...prev, replyMessage];
-              saveMessages(updated);
-              return updated;
-            });
-          }, 1200);
-        }, 500);
-      } else {
-        throw new Error('Failed to send message');
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      // Show generic response instead of error
-      setTimeout(() => {
-        setIsTyping(true);
-        setTimeout(() => {
-          setIsTyping(false);
-          const genericResponse = GENERIC_RESPONSES[Math.floor(Math.random() * GENERIC_RESPONSES.length)];
-          const responseMessage: Message = {
-            id: generateId(),
-            text: genericResponse,
-            isUser: false,
-            timestamp: new Date(),
-          };
-          setMessages((prev) => {
-            const updated = [...prev, responseMessage];
-            saveMessages(updated);
-            return updated;
-          });
-        }, 800);
-      }, 500);
-    } finally {
+      await sendToApi(text, senderEmail);
+      setIsSending(false);
+    }
+  };
+
+  const handleEmailSubmit = async (email: string) => {
+    // Show user's email as a message bubble
+    const emailMessage: Message = {
+      id: generateId(),
+      text: email,
+      isUser: true,
+      timestamp: new Date(),
+      status: 'delivered',
+    };
+
+    setMessages((prev) => {
+      const updated = [...prev, emailMessage];
+      saveMessages(updated);
+      return updated;
+    });
+
+    // Save email
+    setSenderEmail(email);
+    localStorage.setItem(EMAIL_KEY, email);
+    setInputMode('message');
+
+    // Track analytics
+    trackContactEmail(email);
+
+    // Bot confirms and sends
+    const confirmPhrase = EMAIL_CONFIRM_PHRASES[Math.floor(Math.random() * EMAIL_CONFIRM_PHRASES.length)];
+    addBotMessage(confirmPhrase, 500, 800);
+
+    // Send the pending message
+    if (pendingMessage) {
+      setIsSending(true);
+      await sendToApi(pendingMessage, email);
+      setPendingMessage(null);
       setIsSending(false);
     }
   };
@@ -346,11 +376,15 @@ export default function ChatContainer() {
     // Clear all storage
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(CTA_KEY);
-    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(EMAIL_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
 
     // Reset state
     setMessages([]);
     setShowRestart(false);
+    setSenderEmail('');
+    setInputMode('message');
+    setPendingMessage(null);
 
     // Restart intro sequence
     startIntroSequence();
@@ -373,7 +407,7 @@ export default function ChatContainer() {
   }, [] as { message: Message; showAvatar: boolean; isLastInGroup: boolean }[]);
 
   return (
-    <div className="flex flex-col h-screen bg-white dark:bg-black overflow-hidden">
+    <div className="flex flex-col h-full bg-white dark:bg-black overflow-hidden">
       <ChatHeader name="Imran Wafa" isOnline={true} />
 
       {/* Messages Area */}
@@ -446,7 +480,12 @@ export default function ChatContainer() {
       </div>
 
       {/* Input Area */}
-      <InputBar onSendMessage={handleSendMessage} disabled={isSending} />
+      <InputBar
+        onSendMessage={handleSendMessage}
+        onSubmitEmail={handleEmailSubmit}
+        mode={inputMode}
+        disabled={isSending}
+      />
     </div>
   );
 }

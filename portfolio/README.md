@@ -1,18 +1,23 @@
 # Imran Wafa - iMessage Portfolio
 
-An interactive, iMessage-style personal portfolio website built with Next.js, TypeScript, and Tailwind CSS. Features animated message sequences, a functional contact form with email delivery, rate limiting, and dark mode support.
+An interactive, iMessage-style personal portfolio website built with Next.js 14, TypeScript, and Tailwind CSS. Features animated message sequences, link preview cards, a contact form with email collection and AI-powered responses, rate limiting, session persistence, and dark mode support.
 
 ![Portfolio Preview](./public/preview.png)
 
 ## Features
 
-- **iMessage Interface**: Authentic iOS-style chat interface with realistic animations
-- **Animated Message Sequence**: Sequential message appearance with typing indicators
-- **Interactive Portfolio Links**: Clickable LinkedIn, GitHub, and Email links
-- **Contact Form via Chat**: Users can send messages directly through the chat interface
-- **Email Delivery**: Backend API with Nodemailer for sending messages to your email
-- **Rate Limiting**: Prevents spam (1 message per 30 seconds per IP)
-- **Refresh Detection**: Shows "you back?" message on page refresh with restart option
+- **iMessage Interface**: Authentic iOS-style chat interface with realistic message bubbles and animations
+- **Animated Message Sequence**: Sequential intro messages with typing indicators and natural timing
+- **Link Preview Cards**: Rich link previews for LinkedIn, GitHub, and Email with icons and descriptions
+- **Contact Form via Chat**: Users send messages directly through the chat — feels like texting
+- **Email Collection**: Prompts users for their email before sending, stores it for future messages
+- **AI-Powered Responses**: Intent detection summarizes messages and generates contextual auto-replies
+- **Email Delivery**: Backend API with Nodemailer forwards messages to your inbox with HTML formatting
+- **Rate Limiting**: In-memory rate limiter (1 message per 30 seconds per IP)
+- **Spam Detection**: Pattern-based spam filtering on the server
+- **Session Persistence**: Messages persist in localStorage across page loads
+- **Refresh Detection**: Shows welcome-back messages with relative timestamps on page refresh
+- **Restart Option**: Users can clear the conversation and restart the intro sequence
 - **Dark Mode Support**: Automatic dark mode based on system preferences
 - **SEO Optimized**: Meta tags, Open Graph, Twitter Cards, and structured data
 - **Mobile First**: Fully responsive design optimized for mobile devices
@@ -20,9 +25,9 @@ An interactive, iMessage-style personal portfolio website built with Next.js, Ty
 
 ## Tech Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org/) with App Router
+- **Framework**: [Next.js 14](https://nextjs.org/) with App Router
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) + [tailwind-merge](https://github.com/dcastil/tailwind-merge) / [clsx](https://github.com/lukeed/clsx)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Email**: [Nodemailer](https://nodemailer.com/)
@@ -32,7 +37,7 @@ An interactive, iMessage-style personal portfolio website built with Next.js, Ty
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 - SMTP credentials (for email functionality)
 
@@ -79,24 +84,28 @@ npm run dev
 │   ├── app/
 │   │   ├── api/
 │   │   │   └── contact/
-│   │   │       └── route.ts      # API route for contact form
-│   │   ├── globals.css           # Global styles
-│   │   ├── layout.tsx            # Root layout with SEO meta tags
-│   │   └── page.tsx              # Main page
+│   │   │       └── route.ts          # Contact API with rate limiting, spam detection & AI responses
+│   │   ├── fonts/                    # Local font files
+│   │   ├── globals.css               # Global styles & CSS variables
+│   │   ├── layout.tsx                # Root layout with SEO meta tags
+│   │   └── page.tsx                  # Main page
 │   ├── components/
-│   │   ├── ChatContainer.tsx     # Main chat container
-│   │   ├── ChatHeader.tsx        # Chat header component
-│   │   ├── InputBar.tsx          # Message input bar
-│   │   ├── MessageBubble.tsx     # Message bubble component
-│   │   ├── RestartButton.tsx     # Restart button component
-│   │   └── TypingIndicator.tsx   # Typing indicator animation
+│   │   ├── ChatContainer.tsx         # Main chat logic, message sequencing & session persistence
+│   │   ├── ChatHeader.tsx            # Chat header with name and online status
+│   │   ├── InputBar.tsx              # Message/email input bar with mode switching
+│   │   ├── LinkPreviewCard.tsx       # Rich link preview cards (LinkedIn, GitHub, Email)
+│   │   ├── MessageBubble.tsx         # Styled message bubbles with delivery status
+│   │   ├── RestartButton.tsx         # Conversation restart button
+│   │   └── TypingIndicator.tsx       # Animated typing dots
 │   └── lib/
-│       ├── types.ts              # TypeScript types
-│       └── utils.ts              # Utility functions
-├── .env.example                  # Example environment variables
-├── next.config.ts                # Next.js configuration
+│       ├── types.ts                  # TypeScript interfaces (Message, LinkPreview, AIResponse, etc.)
+│       └── utils.ts                  # Utilities (IDs, dates, random phrase generators)
+├── public/
+│   └── manifest.json                 # PWA manifest
+├── .env.example                      # Example environment variables
+├── next.config.ts                    # Next.js configuration
+├── tailwind.config.ts                # Tailwind CSS configuration
 ├── package.json
-├── tailwind.config.ts
 └── README.md
 ```
 
@@ -106,21 +115,20 @@ npm run dev
 
 1. **Name and Avatar**: Edit `src/components/ChatHeader.tsx` and `src/components/MessageBubble.tsx`
 2. **Intro Messages**: Edit the `INTRO_MESSAGES` array in `src/components/ChatContainer.tsx`
-3. **Social Links**: Update the `LINK_MESSAGES` array in `src/components/ChatContainer.tsx`
+3. **Social Links**: Update the `LINK_PREVIEWS` array in `src/components/ChatContainer.tsx`
 
-### Update Links
+### Update Link Previews
 
-In `src/components/ChatContainer.tsx`, update the `LINK_MESSAGES` array:
+In `src/components/ChatContainer.tsx`, update the `LINK_PREVIEWS` array:
 
 ```typescript
-const LINK_MESSAGES = [
+const LINK_PREVIEWS: LinkPreview[] = [
   {
-    text: 'LinkedIn',
-    linkData: {
-      url: 'https://linkedin.com/in/YOUR_USERNAME',
-      icon: 'linkedin' as const,
-      label: 'LinkedIn',
-    },
+    url: 'https://linkedin.com/in/YOUR_USERNAME',
+    title: 'LinkedIn',
+    description: 'Connect with me professionally and view my experience.',
+    domain: 'linkedin.com',
+    icon: 'linkedin',
   },
   // ... other links
 ];
@@ -154,8 +162,6 @@ Build the project:
 npm run build
 ```
 
-The static files will be in the `dist` directory.
-
 ## Environment Variables
 
 | Variable | Description | Required |
@@ -171,12 +177,13 @@ The static files will be in the `dist` directory.
 
 ### POST /api/contact
 
-Sends a message via email.
+Sends a message via email with AI-powered summarization and auto-response.
 
 **Request Body:**
 ```json
 {
   "message": "Hello!",
+  "senderEmail": "user@example.com",
   "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
@@ -186,6 +193,10 @@ Sends a message via email.
 {
   "success": true,
   "message": "Message sent successfully",
+  "aiResponse": {
+    "summary": "getting in touch",
+    "response": "Got it. I'll follow up on getting in touch soon."
+  },
   "rateLimit": {
     "remaining": 0,
     "resetTime": 1704067200000
@@ -197,18 +208,16 @@ Sends a message via email.
 - Maximum 1 request per 30 seconds per IP
 - Returns `429 Too Many Requests` if limit exceeded
 
+**Spam Detection:**
+- Filters messages matching common spam patterns
+- Returns `400 Bad Request` for flagged content
+
 ## Browser Support
 
 - Chrome 90+
 - Firefox 88+
 - Safari 14+
 - Edge 90+
-
-## Performance
-
-- Lighthouse Score: 95+ (Performance, Accessibility, Best Practices, SEO)
-- First Contentful Paint: < 1s
-- Time to Interactive: < 2s
 
 ## License
 
