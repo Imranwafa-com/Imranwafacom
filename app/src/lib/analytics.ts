@@ -150,6 +150,93 @@ export function trackThemeToggle(theme: string): void {
     });
 }
 
+export interface DetailedAnalytics extends AnalyticsSummary {
+    totalTimeOnSite: number;          // ms
+    longestSession: number;           // ms
+    shortestSession: number;          // ms
+    themeToggleCount: number;
+    projectFilterCount: number;
+    linkClickCount: number;
+    pageTimings: Record<string, number>; // page -> total ms spent
+    sessionDurations: number[];          // all session durations ms
+    visitHours: number[];                // hour-of-day for each session_start
+    daysSinceFirst: number;
+}
+
+export function getDetailedAnalytics(): DetailedAnalytics {
+    const stored = getStored();
+    const events = stored.events;
+    const sessions = stored.sessions;
+
+    const pageViews: Record<string, number> = {};
+    const pageTimings: Record<string, number> = {};
+    let totalMessages = 0;
+    let themeToggleCount = 0;
+    let projectFilterCount = 0;
+    let linkClickCount = 0;
+    const visitHours: number[] = [];
+
+    events.forEach((e) => {
+        if (e.type === 'navigation' && e.page) {
+            pageViews[e.page] = (pageViews[e.page] || 0) + 1;
+        }
+        if (e.type === 'page_view' && e.page && e.duration) {
+            pageTimings[e.page] = (pageTimings[e.page] || 0) + e.duration;
+        }
+        if (e.type === 'contact_message') totalMessages++;
+        if (e.type === 'theme_toggle') themeToggleCount++;
+        if (e.type === 'project_filter') projectFilterCount++;
+        if (e.type === 'link_click') linkClickCount++;
+        if (e.type === 'session_start') {
+            visitHours.push(new Date(e.timestamp).getHours());
+        }
+    });
+
+    const topPages = Object.entries(pageViews)
+        .map(([page, views]) => ({ page, views }))
+        .sort((a, b) => b.views - a.views);
+
+    const sessionDurations = events
+        .filter((e) => e.type === 'session_end' && e.duration && e.duration > 0)
+        .map((e) => e.duration!);
+
+    const avgDuration = sessionDurations.length > 0
+        ? sessionDurations.reduce((a, b) => a + b, 0) / sessionDurations.length
+        : 0;
+
+    const totalTimeOnSite = sessionDurations.reduce((a, b) => a + b, 0);
+    const longestSession = sessionDurations.length > 0 ? Math.max(...sessionDurations) : 0;
+    const shortestSession = sessionDurations.length > 0 ? Math.min(...sessionDurations) : 0;
+
+    const timestamps = events.map((e) => e.timestamp);
+    const firstVisit = timestamps[0] || '';
+    const daysSinceFirst = firstVisit
+        ? Math.floor((Date.now() - new Date(firstVisit).getTime()) / 86_400_000)
+        : 0;
+
+    return {
+        totalSessions: sessions.length,
+        totalPageViews: Object.values(pageViews).reduce((a, b) => a + b, 0),
+        totalMessages,
+        averageSessionDuration: avgDuration,
+        pageViews,
+        topPages,
+        recentEvents: events.slice(-20),
+        firstVisit,
+        lastVisit: timestamps[timestamps.length - 1] || '',
+        totalTimeOnSite,
+        longestSession,
+        shortestSession,
+        themeToggleCount,
+        projectFilterCount,
+        linkClickCount,
+        pageTimings,
+        sessionDurations,
+        visitHours,
+        daysSinceFirst,
+    };
+}
+
 export function getAnalyticsSummary(): AnalyticsSummary {
     const stored = getStored();
     const events = stored.events;

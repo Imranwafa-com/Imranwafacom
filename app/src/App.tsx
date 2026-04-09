@@ -8,6 +8,14 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ContactPage from './pages/ContactPage';
+import MouseAurora from './components/MouseAurora';
+import IdleMessage from './components/IdleMessage';
+import CommandPalette from './components/CommandPalette';
+import TabWatcher from './components/TabWatcher';
+import MobileDisclaimer from './components/MobileDisclaimer';
+import { SpeedReaderNotice, BottomMessage, TldrUnlockToast } from './components/ScrollQuirk';
+import TldrPage from './pages/TldrPage';
+import { TimeProvider, useTimePalette } from './context/TimeContext';
 import config from './lib/config';
 import { SpeedInsights } from "@vercel/speed-insights/react"
 
@@ -66,11 +74,12 @@ function App() {
         overlay.innerHTML = `
           <div style="
             position: fixed; top: 20px; right: 20px; z-index: 99999;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 1px solid rgba(0, 122, 255, 0.3);
-            border-radius: 16px; padding: 20px 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 122, 255, 0.1);
-            font-family: 'Inter', sans-serif; max-width: 340px;
+            background: rgba(10, 10, 20, 0.8);
+            backdrop-filter: blur(24px) saturate(1.4);
+            border: 1px solid rgba(103, 232, 249, 0.15);
+            border-radius: 20px; padding: 20px 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(103, 232, 249, 0.06);
+            font-family: 'DM Sans', sans-serif; max-width: 340px;
             animation: slideIn 0.4s cubic-bezier(0.25, 0.4, 0.25, 1);
           ">
             <style>
@@ -92,7 +101,7 @@ function App() {
             </div>
             <a href="${config.personal.github}" target="_blank" rel="noopener noreferrer" style="
               display: inline-block; padding: 8px 16px;
-              background: #007AFF; color: white; border-radius: 8px;
+              background: linear-gradient(135deg, #67e8f9, #60a5fa); color: white; border-radius: 12px;
               font-size: 13px; font-weight: 500; text-decoration: none;
               transition: background 0.2s;
             " onmouseover="this.style.background='#0066DD'" onmouseout="this.style.background='#007AFF'">
@@ -121,7 +130,21 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0f] text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <TimeProvider>
+      <AppShell location={location} />
+    </TimeProvider>
+  );
+}
+
+function AppShell({ location }: { location: ReturnType<typeof useLocation> }) {
+  const palette = useTimePalette();
+
+  return (
+    <div
+      className="min-h-screen text-gray-900 dark:text-[#f0f4ff] transition-colors duration-1000"
+      style={{ backgroundColor: palette.bg }}
+    >
+      <MouseAurora key={palette.period} />
       <ScrollToTop />
       <Navbar />
       <AnimatePresence mode="wait">
@@ -130,9 +153,18 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/tldr" element={<TldrPage />} />
         </Routes>
       </AnimatePresence>
       {location.pathname !== '/contact' && <Footer />}
+      <IdleMessage />
+      <CommandPalette />
+      <TabWatcher />
+      <MobileDisclaimer />
+      <SpeedReaderNotice />
+      <BottomMessage />
+      <TldrUnlockToast />
+      <SpeedInsights />
     </div>
   );
 }

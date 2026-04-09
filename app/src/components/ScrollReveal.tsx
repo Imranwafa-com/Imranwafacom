@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { useRef, type ReactNode } from 'react';
+import { motion, useInView } from 'framer-motion';
 
 interface ScrollRevealProps {
     children: ReactNode;
@@ -13,54 +13,44 @@ export default function ScrollReveal({
     children,
     delay = 0,
     direction = 'up',
-    duration = 0.6,
+    duration = 0.7,
     className = '',
 }: ScrollRevealProps) {
     const ref = useRef<HTMLDivElement>(null);
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                    observer.unobserve(entry.target);
-                }
-            },
-            { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }
-        );
-
-        if (ref.current) observer.observe(ref.current);
-        return () => observer.disconnect();
-    }, []);
+    const isInView = useInView(ref, {
+        amount: 0.12,
+        margin: '0px 0px -60px 0px',
+    });
 
     const directionOffset = {
-        up: { y: 40, x: 0 },
-        down: { y: -40, x: 0 },
-        left: { y: 0, x: -40 },
-        right: { y: 0, x: 40 },
+        up: { y: 30, x: 0 },
+        down: { y: -30, x: 0 },
+        left: { y: 0, x: -30 },
+        right: { y: 0, x: 30 },
+    };
+
+    const hidden = {
+        opacity: 0,
+        y: directionOffset[direction].y,
+        x: directionOffset[direction].x,
+        filter: 'blur(6px)',
+    };
+
+    const visible = {
+        opacity: 1,
+        y: 0,
+        x: 0,
+        filter: 'blur(0px)',
     };
 
     return (
         <motion.div
             ref={ref}
-            initial={{
-                opacity: 0,
-                y: directionOffset[direction].y,
-                x: directionOffset[direction].x,
-            }}
-            animate={
-                isVisible
-                    ? { opacity: 1, y: 0, x: 0 }
-                    : {
-                        opacity: 0,
-                        y: directionOffset[direction].y,
-                        x: directionOffset[direction].x,
-                    }
-            }
+            initial={hidden}
+            animate={isInView ? visible : hidden}
             transition={{
                 duration,
-                delay,
+                delay: isInView ? delay : 0,
                 ease: [0.25, 0.4, 0.25, 1],
             }}
             className={className}

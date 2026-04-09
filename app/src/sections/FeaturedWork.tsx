@@ -1,75 +1,75 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
+import { useTimePalette } from '../context/TimeContext';
 import config from '../lib/config';
+import { SnarkyPrefix, CameBackBadge } from '../components/ScrollQuirk';
+import { useSectionTracker } from '../hooks/useScrollQuirks';
 
 const featured = config.featuredWork.projects;
 
 export default function FeaturedWork() {
+    const palette = useTimePalette();
+    const tracker = useSectionTracker('featured-work');
     return (
-        <section className="py-24 px-6">
-            <div className="max-w-6xl mx-auto">
+        <section ref={tracker.ref} className="py-32 px-6 relative">
+            <div className="max-w-5xl mx-auto">
+                <CameBackBadge sectionId="featured-work" />
+                <SnarkyPrefix sectionId="featured-work" />
                 <ScrollReveal>
-                    <div className="flex items-end justify-between mb-12">
-                        <div>
-                            <p className="text-sm font-medium text-[#007AFF] tracking-widest uppercase mb-2">
-                                {config.featuredWork.sectionLabel}
-                            </p>
-                            <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 dark:text-white">
-                                {config.featuredWork.heading}
-                            </h2>
-                        </div>
+                    <div className="flex items-end justify-between mb-16">
+                        <h2
+                            className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white/90"
+                            style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                        >
+                            {config.featuredWork.heading}
+                        </h2>
                         <Link
                             to="/projects"
-                            className="hidden sm:flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-[#007AFF] dark:hover:text-[#007AFF] transition-colors"
+                            className="hidden sm:flex items-center gap-1.5 text-sm text-white/30 hover:text-white/60 transition-colors duration-300"
                         >
-                            View all
-                            <ArrowUpRight className="w-4 h-4" />
+                            {config.featuredWork.viewAllText}
+                            <ArrowUpRight className="w-3.5 h-3.5" />
                         </Link>
                     </div>
                 </ScrollReveal>
 
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="space-y-4">
                     {featured.map((project, index) => (
-                        <ScrollReveal key={project.title} delay={index * 0.15}>
+                        <ScrollReveal key={project.title} delay={index * 0.08}>
                             <Link to="/projects">
-                                <motion.div
-                                    whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                                    className="group relative bg-white dark:bg-[#141420] rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:border-[#007AFF]/30 dark:hover:border-[#007AFF]/30 transition-all duration-300 h-full"
-                                >
-                                    <div className={`h-32 bg-gradient-to-br ${project.color} relative overflow-hidden`}>
-                                        <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#141420] to-transparent opacity-60" />
-                                        <motion.div
-                                            className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center bg-white/20 dark:bg-white/10 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                                        >
-                                            <ArrowUpRight className="w-4 h-4 text-white" />
-                                        </motion.div>
-                                    </div>
-
-                                    <div className="p-6 -mt-6 relative">
+                                <div className="group flex items-center justify-between py-6 px-6 rounded-2xl border border-transparent hover:border-white/[0.06] hover:bg-white/[0.02] transition-all duration-500 cursor-pointer">
+                                    <div className="flex items-center gap-5">
                                         <div
-                                            className="w-3 h-3 rounded-full mb-4"
+                                            className="w-2 h-2 rounded-full shrink-0"
                                             style={{ backgroundColor: project.accent }}
                                         />
-                                        <h3 className="text-lg font-heading font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#007AFF] transition-colors">
-                                            {project.title}
-                                        </h3>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
-                                            {project.description}
-                                        </p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {project.tags.map((tag) => (
+                                        <div>
+                                            <h3
+                                                className="text-lg font-semibold text-gray-900 dark:text-white/80 group-hover:text-white transition-colors duration-300"
+                                                style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                                            >
+                                                {project.title}
+                                            </h3>
+                                            <p className="text-sm text-gray-500 dark:text-white/25 mt-1">
+                                                {project.description}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="hidden md:flex gap-2">
+                                            {project.tags.slice(0, 3).map((tag) => (
                                                 <span
                                                     key={tag}
-                                                    className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 font-medium"
+                                                    className="text-[11px] px-2.5 py-1 rounded-full text-white/20 border border-white/[0.06] font-medium"
                                                 >
                                                     {tag}
                                                 </span>
                                             ))}
                                         </div>
+                                        <ArrowUpRight className="w-4 h-4 text-white/15 group-hover:text-white/50 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                                     </div>
-                                </motion.div>
+                                </div>
                             </Link>
                         </ScrollReveal>
                     ))}
@@ -78,9 +78,10 @@ export default function FeaturedWork() {
                 <div className="mt-8 text-center sm:hidden">
                     <Link
                         to="/projects"
-                        className="inline-flex items-center gap-1 text-sm font-medium text-[#007AFF]"
+                        className="inline-flex items-center gap-1 text-sm font-medium"
+                        style={{ color: palette.accent }}
                     >
-                        View all projects
+                        {config.featuredWork.viewAllTextMobile}
                         <ArrowUpRight className="w-4 h-4" />
                     </Link>
                 </div>

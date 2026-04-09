@@ -3,24 +3,24 @@
         "name": "Imran Wafa",
         "firstName": "Imran",
         "logo": "IW",
-        "tagline": "Builder, developer, and creative technologist",
+        "tagline": "i build things. sometimes i design them too.",
         "email": "imran@imranwafa.com",
-        "github": "https://github.com/imranwafa-com",
-        "githubHandle": "imranwafa-com"
+        "github": "https://github.com/imranhwafa",
+        "githubHandle": "imranhwafa"
     },
     "meta": {
         "title": "Imran Wafa",
-        "description": "Imran Wafa, Builder, developer, Data analyst and creative technologist. Explore my work and get in touch.",
+        "description": "Imran Wafa. I build web stuff, analyze data, and sometimes design things. take a look around.",
         "themeColor": "#0a0a0f"
     },
     "hero": {
-        "greeting": "Welcome to my corner of the internet",
+        "greeting": "you found my little corner of the internet",
         "rotatingTitles": [
             "I build things.",
-            "I design experiences.",
-            "I write clean code.",
-            "I turn numbers into solutions.",
-            "I solve problems."
+            "sometimes they even work.",
+            "I write code. mostly clean.",
+            "I turn data into something useful.",
+            "I break things to fix them."
         ],
         "ctaPrimary": {
             "text": "View My Work",
@@ -29,15 +29,20 @@
         "ctaSecondary": {
             "text": "Get In Touch",
             "link": "/contact"
-        }
+        },
+        "scrollDown": "keep going",
+        "scrollUp": "changed your mind?",
+        "timeTrackHint": "(yes, i track the time)"
     },
     "featuredWork": {
         "sectionLabel": "Featured Work",
         "heading": "Things I've Built",
+        "viewAllText": "View all",
+        "viewAllTextMobile": "View all projects",
         "projects": [
             {
                 "title": "FloUwer",
-                "description": "AI-powered (LLM and vision) browser with workflow automation and intelligent browsing capabilities.",
+                "description": "a browser that watches what you do and replays it. has AI in it. got out of hand fast.",
                 "tags": [
                     "Electron",
                     "React",
@@ -60,7 +65,7 @@
             },
             {
                 "title": "JabBit",
-                "description": "Single page workflow automation extension for chromium based browsers.",
+                "description": "chrome extension that handles repetitive browser tasks so i don't have to.",
                 "tags": [
                     "Python",
                     "Automation",
@@ -76,8 +81,8 @@
         "heading": "A Quick",
         "headingHighlight": "Introduction",
         "paragraphs": [
-            "I'm a developer and builder who loves creating things that live at the intersection of design and technology. I care deeply about the details, from pixel-perfect UIs to clean, maintainable code.",
-            "Whether it's automating workflows with AI, building beautiful web experiences, or experimenting with new technologies, I'm always looking for the next thing to build."
+            "I'm a developer who likes making things that look good and actually work. I spend way too much time on details most people won't notice. but I notice.",
+            "Lately it's been AI, web stuff, and automating things that didn't need automating but are way cooler now. always something new to get into."
         ],
         "skills": [
             {
@@ -96,16 +101,20 @@
                 "label": "Tools",
                 "value": "Git, Docker, Figma"
             }
-        ]
+        ],
+        "moreAboutText": "More about me",
+        "moreAboutHint": "(it's worth it, I promise)",
+        "introHoverHint": "(pixel-obsessed, actually)",
+        "headingHint": "(the part where I sell myself)"
     },
     "about": {
         "sectionLabel": "About Me",
         "heading": "Hey, I'm",
         "headingHighlight": "Imran",
         "bio": [
-            "I am a data analyst and developer who loves creating things that matter. I believe the best software is built at the intersection of thoughtful design and solid engineering, and that's where I like to live.",
-            "When I'm not coding, you'll find me messing with hardware, tearing down a engine, or figuring out how to automate something that probably didn't need to be automated (but it's cooler now).",
-            "I care about the craft. Every pixel, every excel row, every animation, every line of code. The details are what make something feel <em>right</em>."
+            "I build things and analyze data, usually at the same time. I care a lot about software that actually feels good to use, not just works. there's a difference and most people skip it.",
+            "When I'm not at a computer, I'm probably messing with hardware, tearing down a engine, or figuring out how to automate something that really didn't need to be automated. worth it though.",
+            "I care about the craft. every pixel, every excel row, every animation, every line of code. the details are what make something feel <em>right</em>."
         ],
         "skills": [
             {
@@ -159,28 +168,28 @@
                 "title": "Data Analyst",
                 "subtitle": "Data analytics/Automation - Instawire LLC",
                 "period": "2021 - 2024",
-                "description": "Creating Graphs, charts, and other data visualizations to help businesses make better decisions."
+                "description": "built dashboards and charts to help the team actually understand their data. lots of excel. more stakeholder meetings than i'd like."
             },
             {
                 "icon": "GraduationCap",
                 "title": "Data and Dev Certifications",
                 "subtitle": "Google, AWS, Comptia and others",
                 "period": "2021 - Present",
-                "description": "Completed various certifications in data analytics and development to enhance my skills and knowledge."
+                "description": "picked up certs from Google, AWS, CompTIA and a few others. some were genuinely useful, some were mostly for the piece of paper."
             },
             {
                 "icon": "Briefcase",
                 "title": "Data Analyst",
                 "subtitle": "Data Entry - MGT Well",
                 "period": "2020 - 2021",
-                "description": "Created different types of data on different mediums to get greater qualtiy data."
+                "description": "data entry and cleanup work. not glamorous but i learned what bad data actually looks like up close."
             },
             {
                 "icon": "GraduationCap",
                 "title": "Comp Sci B.S.",
                 "subtitle": "Student",
                 "period": "Ongoing",
-                "description": "Studying the fundamentals while applying them to real-world projects and challenges."
+                "description": "still going. classes are fine, side projects are better."
             }
         ]
     },
@@ -188,7 +197,7 @@
         "sectionLabel": "Projects",
         "heading": "Things I've",
         "headingHighlight": "Built",
-        "description": "A collection of projects that showcase my work in web development, AI, and developer tooling.",
+        "description": "some things i've built. some finished, some still going, all of them taught me something.",
         "categories": [
             "All",
             "Web",
@@ -198,8 +207,8 @@
         "items": [
             {
                 "title": "FloUwer",
-                "description": "AI-powered (LLM and vision) browser with workflow automation and intelligent browsing capabilities.",
-                "longDescription": "An Electron-based browser that records user workflows, replays them with AI intelligence, and supports multiple LLM providers for smart automation.",
+                "description": "a browser that watches what you do and replays it. has AI in it. got out of hand fast.",
+                "longDescription": "built on Electron. records your workflows, replays them with AI in the loop, works with a few different LLM backends. started as a weekend project and kind of took over.",
                 "tags": [
                     "Electron",
                     "React",
@@ -210,12 +219,12 @@
                 "category": "AI/ML",
                 "color": "from-blue-500/20 to-indigo-500/20",
                 "accent": "#007AFF",
-                "github": "https://github.com/imranwafa-com"
+                "github": "https://github.com/imranhwafa"
             },
             {
                 "title": "ImranWafa.com",
                 "description": "The site you're on right now, built with React, Framer Motion, and a couple easter eggs :).",
-                "longDescription": "A personal portfolio built with React and Framer Motion, featuring a unique iMessage-based contact page, smooth page transitions, and rich scroll-triggered animations.",
+                "longDescription": "react and framer motion. iMessage-style contact page, scroll animations, a command palette if you type fast, and more easter eggs than strictly necessary.",
                 "tags": [
                     "React",
                     "Framer Motion",
@@ -225,12 +234,12 @@
                 "category": "Web",
                 "color": "from-purple-500/20 to-pink-500/20",
                 "accent": "#c678dd",
-                "github": "https://github.com/imranwafa-com"
+                "github": "https://github.com/imranhwafa"
             },
             {
                 "title": "JabBit",
-                "description": "Single page workflow automation extension for chromium based browsers.",
-                "longDescription": "An automation tool that streamlines workflows by auto-filling forms, and managing the entire workflow.",
+                "description": "chrome extension that handles repetitive browser tasks so i don't have to.",
+                "longDescription": "auto-fills forms and runs multi-step workflows in the browser. saved me a lot of clicking. still use it.",
                 "tags": [
                     "Python",
                     "Automation",
@@ -240,12 +249,12 @@
                 "category": "Tools",
                 "color": "from-green-500/20 to-emerald-500/20",
                 "accent": "#98c379",
-                "github": "https://github.com/imranwafa-com"
+                "github": "https://github.com/imranhwafa"
             },
             {
                 "title": "miLoader",
-                "description": "Real-time resource load manager for macOS.",
-                "longDescription": "A lightweight macOS daemon that monitors system resources in real time and uses machine learning to predict usage spikes before they happen — automatically rebalancing memory allocation and throttling runaway processes to keep your machine responsive.",
+                "description": "a little daemon that watches your Mac's resources and tries to keep things from going sideways.",
+                "longDescription": "runs in the background, monitors memory and CPU in real time, and uses ML to guess when things are about to spike. throttles runaway processes before they ruin your day. wrote it because my laptop kept dying mid-compile.",
                 "tags": [
                     "C++",
                     "AI",
@@ -258,8 +267,8 @@
             },
             {
                 "title": "Component Library",
-                "description": "A curated set of reusable React components with animations.",
-                "longDescription": "Design system and component library featuring accessible, animated components built with Radix UI primitives and Framer Motion.",
+                "description": "react components I got tired of rebuilding from scratch.",
+                "longDescription": "radix UI plus framer motion. accessible by default, animated because why not. mostly an excuse to build components I actually like using.",
                 "tags": [
                     "React",
                     "Radix UI",
@@ -272,8 +281,8 @@
             },
             {
                 "title": "CLI Toolkit",
-                "description": "Developer productivity tools for the command line.",
-                "longDescription": "A collection of CLI utilities for common development tasks including scaffolding, code generation, and project management.",
+                "description": "CLI tools to stop doing the same setup steps by hand every time.",
+                "longDescription": "scaffolding, code generation, the boring stuff. less flashy than the other projects but i actually use these.",
                 "tags": [
                     "Node.js",
                     "CLI",
@@ -308,26 +317,26 @@
                 "delay": 4000
             }
         ],
-        "linksMessage": "Here are some places you can find me.",
+        "linksMessage": "here's where you can find me:",
         "linkPreviews": [
             {
                 "url": "https://www.linkedin.com/in/imran-w-9741082a3",
                 "title": "LinkedIn",
-                "description": "Connect with me professionally and view my experience.",
+                "description": "work history and stuff. the formal version of me.",
                 "domain": "linkedin.com",
                 "icon": "linkedin"
             },
             {
-                "url": "https://github.com/imranwafa-com",
+                "url": "https://github.com/imranhwafa",
                 "title": "GitHub",
-                "description": "Check out my code, projects, and open source contributions.",
+                "description": "where the actual code lives.",
                 "domain": "github.com",
                 "icon": "github"
             },
             {
                 "url": "mailto:contact@imranwafa.com",
                 "title": "Email",
-                "description": "Send me a direct message for inquiries or collaborations.",
+                "description": "hit me up. i check it.",
                 "domain": "email",
                 "icon": "mail"
             }
@@ -354,7 +363,7 @@
         {
             "platform": "GitHub",
             "icon": "github",
-            "url": "https://github.com/imranwafa-com"
+            "url": "https://github.com/imranhwafa"
         },
         {
             "platform": "LinkedIn",
@@ -369,7 +378,218 @@
     ],
     "footer": {
         "tagline": "Built with React, Framer Motion & a lot of coffee",
-        "copyright": "Imran Wafa. All rights reserved."
+        "copyright": "Imran Wafa. All rights reserved.",
+        "links": [
+            "About",
+            "Projects",
+            "Contact"
+        ]
+    },
+    "navbar": {
+        "links": [
+            {
+                "to": "/",
+                "label": "Home"
+            },
+            {
+                "to": "/about",
+                "label": "About"
+            },
+            {
+                "to": "/projects",
+                "label": "Projects"
+            },
+            {
+                "to": "/contact",
+                "label": "Contact"
+            }
+        ],
+        "themeQuirks": [
+            "can't decide?",
+            "light mode? bold.",
+            "back to the dark side.",
+            "you toggled this 3 times.",
+            "commitment issues?",
+            "the sun is not your friend here.",
+            "okay, decorator.",
+            "light mode. you monster.",
+            "make up your mind.",
+            "back again.",
+            "the darkness welcomes you.",
+            "this is toggle number… i lost count.",
+            "pick a side.",
+            "you toggle like you drive.",
+            "the theme is judging you.",
+            "dark mode is objectively correct.",
+            "okay but why.",
+            "light mode users are a different breed.",
+            "personality test: failed.",
+            "last one, i promise."
+        ]
+    },
+    "aboutPage": {
+        "skillsSectionLabel": "Skills & Tools",
+        "skillsSectionLabelRevisit": "Skills & Tools (you've seen these)",
+        "skillsHeading": "What I Work With",
+        "timelineSectionLabel": "Experience",
+        "timelineHeading": "My Journey",
+        "timelineHeadingHint": "My Journey (it's still going)",
+        "nameHint": "(yes, that's really my name)"
+    },
+    "tldr": {
+        "title": "/tldr",
+        "unlockMessage": "you unlocked this by skipping everything. impressive.",
+        "summaryText": "here's the whole site in 30 seconds since you're clearly in a rush.",
+        "items": [
+            {
+                "label": "what",
+                "value": "builds web apps, automates things, analyzes data."
+            },
+            {
+                "label": "stack",
+                "value": "typescript, react, python, node, tailwind, figma."
+            },
+            {
+                "label": "vibe",
+                "value": "pixel-perfect UIs, clean code, automates things that don't need automating."
+            },
+            {
+                "label": "status",
+                "value": "comp sci student. building things. always shipping."
+            }
+        ],
+        "backText": "back to the full site",
+        "footerHint": "maybe read the real thing next time?"
+    },
+    "commandPalette": {
+        "placeholder": "type a command...",
+        "hintTyping": "just start typing anywhere to open this",
+        "hintKeys": "enter to run · esc to close",
+        "phone": "+1 (253) 292-4570",
+        "statsHeading": "your stats",
+        "secretHeading": "all secrets",
+        "secretFoundText": "you found the master list. nice.",
+        "txtHeading": "get in touch",
+        "txtChatLink": "or open the chat to message me directly →",
+        "backText": "← back",
+        "commandDescriptions": {
+            "stats": "your browsing stats for this site",
+            "tldr": "the whole site in 30 seconds",
+            "txt": "send me a message + phone number",
+            "email": "open email directly",
+            "secret": "all hidden commands & shortcuts",
+            "home": "go back to home",
+            "about": "learn about me",
+            "projects": "see what i've built",
+            "github": "view my github",
+            "linkedin": "connect on linkedin",
+            "clear": "close this prompt"
+        },
+        "secretSections": {
+            "commands": "type commands",
+            "shortcuts": "keyboard shortcuts",
+            "hidden": "hidden behaviors",
+            "shortcutItems": [
+                {
+                    "key": "Ctrl/Cmd + U",
+                    "desc": "view source easter egg"
+                },
+                {
+                    "key": "Ctrl/Cmd + I",
+                    "desc": "view source easter egg"
+                }
+            ],
+            "hiddenItems": [
+                {
+                    "key": "skip 3 sections",
+                    "desc": "unlocks /tldr page"
+                },
+                {
+                    "key": "scroll too fast",
+                    "desc": "speed reader warning"
+                },
+                {
+                    "key": "idle 2 minutes",
+                    "desc": "idle messages appear"
+                },
+                {
+                    "key": "reach bottom",
+                    "desc": "completionist message"
+                },
+                {
+                    "key": "click name 3x+",
+                    "desc": "click counter easter egg"
+                },
+                {
+                    "key": "hover headings",
+                    "desc": "alt text reveals"
+                },
+                {
+                    "key": "toggle theme 3x+",
+                    "desc": "theme commitment issues"
+                },
+                {
+                    "key": "filter projects 5x+",
+                    "desc": "indecisive message"
+                },
+                {
+                    "key": "hover copyright",
+                    "desc": "section read stats"
+                }
+            ]
+        }
+    },
+    "mobileDisclaimer": {
+        "title": "desktop's better for this",
+        "description": "hover stuff, the command thing, all the scroll weirdness - that's all desktop. mobile works but you're missing some bits."
+    },
+    "idleMessages": [
+        "still here? i appreciate the company.",
+        "you've been staring at this page for a while… everything okay?",
+        "i'm flattered you're still here, but maybe go outside?",
+        "fun fact: you've now spent more time here than i spent on some of these features.",
+        "if you're waiting for something to happen… this is it.",
+        "you know, most people leave by now. you're built different.",
+        "at this point we're basically friends.",
+        "the longer you stay, the more easter eggs you might find…",
+        "plot twist: the real portfolio was the idle time we spent together.",
+        "i'm running out of things to say. but i won't leave if you won't."
+    ],
+    "scrollQuirks": {
+        "skipComments": [
+            "as I mentioned in that section you just flew past…",
+            "you skipped that last part, huh? anyway.",
+            "bold choice. let's keep going.",
+            "that part you flew past? kind of important. but fine.",
+            "speed reader energy. where were we.",
+            "tl;dr'd the whole last section? fair. anyway."
+        ],
+        "cameBackComments": [
+            "oh, you came back? missed this part?",
+            "look who decided to actually read this time.",
+            "welcome back. this is the part you skipped.",
+            "second chances exist, I guess.",
+            "ah, curiosity won. good choice.",
+            "the return of the reader."
+        ],
+        "speedWarnings": [
+            "slow down, you're missing the good stuff.",
+            "this isn't a race.",
+            "speedrun any% portfolio reading?"
+        ],
+        "bottomMessages": [
+            "you made it to the bottom. completionist energy.",
+            "that's everything. or is it?",
+            "100% scroll completion unlocked."
+        ]
+    },
+    "projectsPage": {
+        "filterMessages": {
+            "5": "indecisive, huh?",
+            "10": "just pick one already.",
+            "15": "you've now filtered more than you've read.",
+            "20": "at this point you should just view all."
+        }
     },
     "easterEgg": {
         "consoleGreeting": "Hey there, curious dev!",

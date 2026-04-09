@@ -8,16 +8,16 @@
     ██║██║ ╚═╝ ██║██║  ██║██║  ██║██║ ╚████║
     ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝
 
-    👀 Hey, you're looking at my source code!
-    No worries — I keep it open source.
+    Hey, you're looking at my source code!
+    No worries I keep it open source.
 
-    🔗 Check out the full repo:
-       https://github.com/imranwafa-com
+    Check out the full repo:
+    https://github.com/imranwafa-com
 
     Built with React, TypeScript, Framer Motion,
-    and a lot of late nights ☕
+    and a lot of late nights
 
-    If you're a recruiter... yes, I wrote this myself 😄
+    If you're a recruiter... yes, I mostly wrote this myself
     If you're a dev... PRs welcome!
 
 -->
@@ -33,13 +33,382 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200;12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Pacifico&display=swap"
     rel="stylesheet" />
 </head>
 
 <body>
-  <!-- 🤫 You found the secret layer. Go check the console too ;) -->
+  <!--  You found the secret layer. Go check the console too ;) -->
   <div id="root"></div>
+  <noscript>
+    <style>
+      /* Reset */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #fafafa;
+        color: #1a1a2e;
+        line-height: 1.6;
+        padding: 0;
+        min-height: 100vh;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #0a0a14;
+          color: #e0e4f0;
+        }
+
+        .noscript-card {
+          background: rgba(255, 255, 255, 0.04) !important;
+          border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        .noscript-header {
+          border-color: rgba(255, 255, 255, 0.06) !important;
+        }
+
+        .noscript-tag {
+          background: rgba(103, 232, 249, 0.08) !important;
+          color: #67e8f9 !important;
+        }
+
+        .noscript-section-title {
+          color: #67e8f9 !important;
+        }
+
+        .noscript-timeline-dot {
+          background: #67e8f9 !important;
+        }
+
+        .noscript-link {
+          color: #60a5fa !important;
+        }
+
+        .noscript-banner {
+          background: rgba(103, 232, 249, 0.06) !important;
+          border-color: rgba(103, 232, 249, 0.15) !important;
+          color: #67e8f9 !important;
+        }
+      }
+
+      .noscript-container {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 48px 24px;
+      }
+
+      .noscript-banner {
+        text-align: center;
+        padding: 16px 24px;
+        margin-bottom: 40px;
+        border-radius: 12px;
+        background: rgba(103, 232, 249, 0.06);
+        border: 1px solid rgba(103, 232, 249, 0.15);
+        font-size: 14px;
+        color: #475569;
+        line-height: 1.5;
+      }
+
+      .noscript-header {
+        text-align: center;
+        padding-bottom: 32px;
+        margin-bottom: 32px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      }
+
+      .noscript-header h1 {
+        font-family: 'Bricolage Grotesque', 'DM Sans', sans-serif;
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .noscript-header p {
+        font-size: 16px;
+        color: #64748b;
+      }
+
+      .noscript-header .noscript-links {
+        margin-top: 16px;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .noscript-link {
+        color: #3b82f6;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .noscript-link:hover {
+        text-decoration: underline;
+      }
+
+      .noscript-section {
+        margin-bottom: 36px;
+      }
+
+      .noscript-section-title {
+        font-family: 'Bricolage Grotesque', 'DM Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #3b82f6;
+        margin-bottom: 16px;
+      }
+
+      .noscript-card {
+        background: rgba(0, 0, 0, 0.02);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 12px;
+      }
+
+      .noscript-card h3 {
+        font-family: 'Bricolage Grotesque', 'DM Sans', sans-serif;
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      .noscript-card p {
+        font-size: 14px;
+        color: #64748b;
+        margin-bottom: 10px;
+      }
+
+      .noscript-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .noscript-tag {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: rgba(59, 130, 246, 0.08);
+        color: #3b82f6;
+        font-weight: 500;
+      }
+
+      .noscript-skills-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      @media (max-width: 500px) {
+        .noscript-skills-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .noscript-skill-card {
+        background: rgba(0, 0, 0, 0.02);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 12px;
+        padding: 16px;
+      }
+
+      .noscript-skill-card h4 {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      .noscript-skill-card p {
+        font-size: 13px;
+        color: #64748b;
+      }
+
+      .noscript-timeline-item {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .noscript-timeline-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #3b82f6;
+        margin-top: 6px;
+        flex-shrink: 0;
+      }
+
+      .noscript-timeline-content h4 {
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .noscript-timeline-content .noscript-period {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-bottom: 4px;
+      }
+
+      .noscript-timeline-content p {
+        font-size: 13px;
+        color: #64748b;
+      }
+
+      .noscript-footer {
+        text-align: center;
+        margin-top: 48px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        font-size: 12px;
+        color: #94a3b8;
+      }
+
+      @media print {
+        .noscript-banner {
+          display: none;
+        }
+
+        body {
+          background: white;
+          color: black;
+          padding: 0;
+        }
+
+        .noscript-container {
+          padding: 0;
+          max-width: none;
+        }
+      }
+    </style>
+
+    <div class="noscript-container">
+      <div class="noscript-banner">
+        hey, i promise i'm not stealing your data — no need to keep javascript off 😄<br />
+        but since you're here, here's my site as a good old-fashioned resume. no frameworks harmed.
+      </div>
+
+      <header class="noscript-header">
+        <h1>Imran Wafa</h1>
+        <p>Builder, developer, and creative technologist</p>
+        <div class="noscript-links">
+          <a href="https://github.com/imranwafa-com" class="noscript-link">GitHub</a>
+          <a href="https://www.linkedin.com/in/imran-w-9741082a3" class="noscript-link">LinkedIn</a>
+          <a href="mailto:contact@imranwafa.com" class="noscript-link">contact@imranwafa.com</a>
+        </div>
+      </header>
+
+      <section class="noscript-section">
+        <div class="noscript-section-title">About</div>
+        <p style="font-size:14px;color:#64748b;line-height:1.7;">
+          I am a data analyst and developer who loves creating things that matter. I believe the best software is built
+          at the intersection of thoughtful design and solid engineering. When I'm not coding, you'll find me messing
+          with hardware, tearing down an engine, or figuring out how to automate something that probably didn't need to
+          be automated (but it's cooler now).
+        </p>
+      </section>
+
+      <section class="noscript-section">
+        <div class="noscript-section-title">Skills</div>
+        <div class="noscript-skills-grid">
+          <div class="noscript-skill-card">
+            <h4>Frontend</h4>
+            <p>React, TypeScript, Next.js, Tailwind CSS, Framer Motion</p>
+          </div>
+          <div class="noscript-skill-card">
+            <h4>Backend</h4>
+            <p>Node.js, Python, Express, REST APIs, PostgreSQL</p>
+          </div>
+          <div class="noscript-skill-card">
+            <h4>Design</h4>
+            <p>Figma, UI/UX, Prototyping, Design Systems, Animation</p>
+          </div>
+          <div class="noscript-skill-card">
+            <h4>Data & AI</h4>
+            <p>Python, Data Analysis, Machine Learning, AI, LLMs</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="noscript-section">
+        <div class="noscript-section-title">Projects</div>
+        <div class="noscript-card">
+          <h3>FloUwer</h3>
+          <p>AI-powered browser with workflow automation and intelligent browsing capabilities.</p>
+          <div class="noscript-tags">
+            <span class="noscript-tag">Electron</span>
+            <span class="noscript-tag">React</span>
+            <span class="noscript-tag">TypeScript</span>
+            <span class="noscript-tag">AI</span>
+          </div>
+        </div>
+        <div class="noscript-card">
+          <h3>JabBit</h3>
+          <p>Single page workflow automation extension for chromium based browsers.</p>
+          <div class="noscript-tags">
+            <span class="noscript-tag">Python</span>
+            <span class="noscript-tag">Automation</span>
+            <span class="noscript-tag">AI</span>
+          </div>
+        </div>
+        <div class="noscript-card">
+          <h3>miLoader</h3>
+          <p>Real-time resource load manager for macOS with ML-powered prediction.</p>
+          <div class="noscript-tags">
+            <span class="noscript-tag">C++</span>
+            <span class="noscript-tag">AI</span>
+            <span class="noscript-tag">macOS</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="noscript-section">
+        <div class="noscript-section-title">Experience</div>
+        <div class="noscript-timeline-item">
+          <div class="noscript-timeline-dot"></div>
+          <div class="noscript-timeline-content">
+            <h4>Data Analyst — Instawire LLC</h4>
+            <div class="noscript-period">2021 – 2024</div>
+            <p>Creating graphs, charts, and data visualizations to help businesses make better decisions.</p>
+          </div>
+        </div>
+        <div class="noscript-timeline-item">
+          <div class="noscript-timeline-dot"></div>
+          <div class="noscript-timeline-content">
+            <h4>Data Analyst — MGT Well</h4>
+            <div class="noscript-period">2020 – 2021</div>
+            <p>Created different types of data on different mediums to get greater quality data.</p>
+          </div>
+        </div>
+        <div class="noscript-timeline-item">
+          <div class="noscript-timeline-dot"></div>
+          <div class="noscript-timeline-content">
+            <h4>Comp Sci B.S.</h4>
+            <div class="noscript-period">Ongoing</div>
+            <p>Studying the fundamentals while applying them to real-world projects and challenges.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="noscript-footer">
+        © 2024 Imran Wafa. All rights reserved.<br />
+        <span style="margin-top:8px;display:inline-block;">
+          Built with React, Framer Motion & a lot of coffee — but you're seeing the plain version ☕
+        </span>
+      </footer>
+    </div>
+  </noscript>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

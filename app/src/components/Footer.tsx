@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Linkedin, Mail, ArrowUp } from 'lucide-react';
+import { Github, Linkedin, Mail } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import config from '../lib/config';
+import { getReadStats } from '../hooks/useScrollQuirks';
+import { useTimePalette } from '../context/TimeContext';
 
 const iconMap: Record<string, LucideIcon> = { github: Github, linkedin: Linkedin, mail: Mail };
 
@@ -11,67 +14,106 @@ const socialLinks = config.socialLinks.map((link) => ({
     Icon: iconMap[link.icon] || Mail,
 }));
 
+function hexToRgba(hex: string, alpha: number): string {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export default function Footer() {
-    const scrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    const [showStats, setShowStats] = useState(false);
+    const palette = useTimePalette();
+    const stats = getReadStats();
+
+    const getFooterQuirk = () => {
+        if (stats.skipped > 0 && stats.total > 0) {
+            return `you skipped ${stats.skipped} section${stats.skipped > 1 ? 's' : ''}. just saying.`;
+        }
+        if (stats.scrollBackCount > 5) {
+            return `${stats.scrollBackCount} direction changes. you scroll like you drive.`;
+        }
+        return null;
     };
 
-    return (
-        <footer className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0f]">
-            <div className="max-w-6xl mx-auto px-6 py-12">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                    <div className="flex flex-col items-center md:items-start gap-3">
-                        <Link to="/" className="text-xl font-heading font-bold text-gray-900 dark:text-white">
-                            {config.personal.logo}<span className="text-[#007AFF]">.</span>
-                        </Link>
-                        <p className="text-sm text-gray-500 dark:text-gray-500">
-                            {config.footer.tagline}
-                        </p>
-                    </div>
+    const quirk = getFooterQuirk();
 
-                    <div className="flex items-center gap-6">
-                        {['Home', 'About', 'Projects', 'Contact'].map((item) => (
+    return (
+        <footer className="border-t border-white/[0.04]">
+            <div className="max-w-5xl mx-auto px-6 py-10">
+                <AnimatePresence>
+                    {quirk && (
+                        <motion.p
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className="text-[11px] italic text-center mb-4"
+                            style={{ color: hexToRgba(palette.accent, 0.25) }}
+                        >
+                            {quirk}
+                        </motion.p>
+                    )}
+                </AnimatePresence>
+                <div className="flex items-center justify-between">
+                    <p
+                        className="text-[11px] text-white/15 cursor-default"
+                        onMouseEnter={() => setShowStats(true)}
+                        onMouseLeave={() => setShowStats(false)}
+                    >
+                        <AnimatePresence mode="wait">
+                            {showStats ? (
+                                <motion.span
+                                    key="stats"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    style={{ color: hexToRgba(palette.accent, 0.3) }}
+                                >
+                                    {stats.total > 0
+                                        ? `${stats.read}/${stats.total} sections read`
+                                        : 'no sections tracked yet'}
+                                </motion.span>
+                            ) : (
+                                <motion.span
+                                    key="copyright"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    &copy; {new Date().getFullYear()} {config.footer.copyright}
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
+                    </p>
+
+                    <div className="flex items-center gap-4">
+                        {config.footer.links.map((item) => (
                             <Link
                                 key={item}
-                                to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
-                                className="text-sm text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                to={`/${item.toLowerCase()}`}
+                                className="text-[11px] text-white/15 hover:text-white/40 transition-colors duration-300"
                             >
                                 {item}
                             </Link>
                         ))}
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
                         {socialLinks.map(({ Icon, url, platform }) => (
                             <motion.a
                                 key={platform}
                                 href={url}
                                 target={platform !== 'Email' ? '_blank' : undefined}
                                 rel={platform !== 'Email' ? 'noopener noreferrer' : undefined}
-                                whileHover={{ scale: 1.1, y: -2 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="p-2.5 rounded-lg text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                                whileHover={{ scale: 1.1 }}
+                                className="p-2 text-white/15 hover:text-white/40 transition-colors duration-300"
                                 aria-label={platform}
                             >
-                                <Icon className="w-4 h-4" />
+                                <Icon className="w-3.5 h-3.5" />
                             </motion.a>
                         ))}
                     </div>
-                </div>
-
-                <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800/50 flex items-center justify-between">
-                    <p className="text-xs text-gray-400 dark:text-gray-600">
-                        © {new Date().getFullYear()} {config.footer.copyright}
-                    </p>
-                    <motion.button
-                        whileHover={{ y: -2 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={scrollToTop}
-                        className="p-2 rounded-lg text-gray-400 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
-                        aria-label="Scroll to top"
-                    >
-                        <ArrowUp className="w-4 h-4" />
-                    </motion.button>
                 </div>
             </div>
         </footer>
