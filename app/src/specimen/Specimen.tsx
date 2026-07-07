@@ -182,7 +182,6 @@ function Masthead() {
       </div>
       <Tap as="div" className="masthead-c" msg={M.centerTaps}>{M.center}</Tap>
       <div className="masthead-r">
-        <Tap as="span" className="live" msg={M.liveTaps}>{M.liveLabel}</Tap>
         <Tap copy={fmtDate(now)} title={M.dateTitle}>{fmtDate(now)}</Tap>
         <Tap as="span" ripple={false} onTap={() => { setHour12((v) => !v); emitTap(hour12 ? M.time24Msg : M.time12Msg); }} title={M.timeTitle}>{fmtTime(now, hour12)}</Tap>
         <ThemeToggle />
