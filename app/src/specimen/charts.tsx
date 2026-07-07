@@ -165,8 +165,8 @@ export function Donut({ data, size = 110, thickness = 14, onSliceHover }: DonutP
                 strokeDasharray={dasharray}
                 strokeDashoffset={-offset}
                 style={{ transition: "stroke-width 200ms", cursor: "pointer" }}
-                onMouseEnter={() => { setHover(i); onSliceHover && onSliceHover(i); }}
-                onMouseLeave={() => { setHover(null); onSliceHover && onSliceHover(null); }}
+                onMouseEnter={() => { setHover(i); onSliceHover?.(i); }}
+                onMouseLeave={() => { setHover(null); onSliceHover?.(null); }}
                 onClick={() => emitTap(tpl(COPY.viz.donut, { label: d.label, value: d.value }))}
               />
             );

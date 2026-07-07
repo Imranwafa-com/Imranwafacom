@@ -250,6 +250,7 @@ export function InteractiveBG() {
     window.addEventListener("touchend", onTouchEnd);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", resize);
+    window.addEventListener("iw-theme", readColors); // instant recolor on theme flip
     raf = requestAnimationFrame(loop);
 
     return () => {
@@ -261,6 +262,7 @@ export function InteractiveBG() {
       window.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("iw-theme", readColors);
       cancelAnimationFrame(raf);
       setRippleFn(null);
     };

@@ -14,6 +14,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { InteractiveBG } from '../specimen/bg';
+import { ResumeLoader } from './ResumeLoader';
 import './resume.css';
 
 // Bundle the worker locally so the reader is fully self-contained — no CDN,
@@ -22,12 +23,16 @@ import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
 const FLIP_LOCK = 460; // ms between page flips — tames trackpad inertia
+const MOBILE_MQ = '(max-width: 640px)';
 
 // Page width tracks the viewport. Phones get a wider fraction (no side panels)
 // and are capped a touch shorter so the sheet fits above the bottom bar.
+// This must stay JS: react-pdf rasterizes the canvas at an exact pixel width,
+// so it can't be a CSS length — but we debounce updates (below) so the PDF
+// re-renders once after a resize settles, not on every intermediate frame.
 function calcPageW() {
   const vw = window.innerWidth;
-  if (vw <= 640) return Math.min(vw * 0.9, (window.innerHeight - 150) / 1.3);
+  if (window.matchMedia(MOBILE_MQ).matches) return Math.min(vw * 0.9, (window.innerHeight - 150) / 1.3);
   return Math.min(vw * 0.82, 760);
 }
 
@@ -42,14 +47,25 @@ export default function Resume() {
   // keep scrolling — until then the deck owns the scroll.
   const [showFooter, setShowFooter] = useState(false);
   const [pageW, setPageW] = useState(calcPageW);
-  const [mob, setMob] = useState(() => window.innerWidth <= 640);
+  const [mob, setMob] = useState(() => window.matchMedia(MOBILE_MQ).matches);
   const lock = useRef(false);
 
-  // Keep the sheet sized to the viewport on rotate/resize.
+  // Breakpoint via matchMedia — fires only when the boundary is actually
+  // crossed, so no per-frame innerWidth reads during a resize drag.
   useEffect(() => {
-    const onResize = () => { setPageW(calcPageW()); setMob(window.innerWidth <= 640); };
+    const mq = window.matchMedia(MOBILE_MQ);
+    const onChange = () => setMob(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  // Sheet width: debounce so the PDF re-rasterizes once after the resize
+  // settles (150ms), instead of on every intermediate resize event.
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const onResize = () => { clearTimeout(t); t = setTimeout(() => setPageW(calcPageW()), 150); };
     window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    return () => { clearTimeout(t); window.removeEventListener('resize', onResize); };
   }, []);
 
   const go = useCallback((dir: 1 | -1) => {
@@ -126,7 +142,11 @@ export default function Resume() {
           opacity: leaving || showFooter ? 0 : 1,
           scale: leaving ? 0.97 : 1,
           y: showFooter ? -window.innerHeight * (mob ? 0.3 : 0.5) : 0,
-          filter: leaving ? 'blur(6px)' : 'blur(0px)',
+          // 'none' (not 'blur(0px)') when idle: a no-op blur still forces a GPU
+          // layer that rasterizes once and won't repaint the async-drawn PDF
+          // canvas until a scroll invalidates it — the "blank until you scroll"
+          // bug. Only promote to a filter layer during the leaving flourish.
+          filter: leaving ? 'blur(6px)' : 'none',
         }}
         transition={{ duration: reduce ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}
       >
@@ -134,7 +154,7 @@ export default function Resume() {
           file="/resume.pdf"
           onLoadSuccess={({ numPages }) => setNumPages(numPages)}
           onLoadError={(e) => console.error(e)}
-          loading={<div className="resume-status">unrolling the paper…</div>}
+          loading={<ResumeLoader />}
           error={<div className="resume-status resume-status-err">couldn't load the resume. the file's at <code>/resume.pdf</code> if you'd rather grab it directly.</div>}
         >
           {numPages > 0 && Array.from({ length: numPages }, (_, i) => {
@@ -149,7 +169,7 @@ export default function Resume() {
                 animate={reduce ? {
                   // Reduced motion: just swap, no flight.
                   opacity: d === 0 ? 1 : 0,
-                  y: 0, scale: 1, rotateX: 0, rotateZ: 0, filter: 'blur(0px)',
+                  y: 0, scale: 1, rotateX: 0, rotateZ: 0, filter: 'none',
                 } : {
                   // Read sheets lift off the top of the deck; deck sheets fan
                   // out below the front. Toned down on mobile — a smaller, flatter
@@ -160,7 +180,10 @@ export default function Resume() {
                   rotateX: read ? (mob ? 6 : 22) : 0,
                   rotateZ: read ? (mob ? (i % 2 ? -1.5 : 1.5) : (i % 2 ? -4 : 4)) : 0,
                   opacity: read ? 0 : Math.max(0, 1 - Math.min(d, 4) * 0.16),
-                  filter: mob ? 'blur(0px)' : (read ? 'blur(3px)' : 'blur(0px)'),
+                  // Real blur only on the read-away sheets (desktop); the front
+                  // and deck sheets stay 'none' so their PDF canvas isn't trapped
+                  // in a stale GPU layer (see the deck's filter note above).
+                  filter: !mob && read ? 'blur(3px)' : 'none',
                 }}
                 transition={mob
                   ? { type: 'spring', stiffness: 300, damping: 34 }   // snappier, little overshoot

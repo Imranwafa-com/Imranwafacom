@@ -12,9 +12,9 @@
     No worries I keep it open source.
 
     Check out the full repo:
-    https://github.com/imranwafa-com
+    https://github.com/imranhwafa
 
-    Built with React, TypeScript, Framer Motion,
+    Built with React, TypeScript,
     and a lot of late nights
 
     If you're a recruiter... yes, I mostly wrote this myself
@@ -29,25 +29,65 @@
   <meta name="description"
     content="Imran Wafa · Operations technician across network, database, and data analytics. 24/7 NOC monitoring, infrastructure, and data-quality engineering. Explore my work and get in touch." />
   <meta name="theme-color" content="#fbfbfc" />
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-  <link rel="apple-touch-icon" href="./favicon.svg" />
-  <link rel="manifest" href="./manifest.json" />
+  <script>
+    // Restore the persisted theme before first paint (no light-flash).
+    // ?theme=carbon|paper overrides for sharing/testing (not persisted);
+    // with no stored choice, follow the system preference.
+    // Keep the colors in sync with --paper in specimen.css.
+    try {
+      var m = location.search.match(/[?&]theme=(carbon|paper)/);
+      var t = m ? m[1] : localStorage.getItem('iw_theme');
+      if (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) t = 'carbon';
+      if (t === 'carbon') {
+        document.documentElement.dataset.theme = 'carbon';
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', '#101014');
+      }
+    } catch (e) { /* private mode */ }
+  </script>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.json" />
   <title>Imran Wafa · A Specimen Sheet</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <!-- Only the three always-used families are in the critical path; the
-       experiment fonts (Archivo, Familjen Grotesk, Syne) are
-       lazy-loaded on demand by ensureFontLoaded() in motion.tsx. -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'" />
-  <noscript>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" />
-  </noscript>
-  <script type="module" crossorigin src="./assets/index-BG9aK4S6.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/vendor-core-Bmy4nI93.js">
-  <link rel="modulepreload" crossorigin href="./assets/vendor-react-D6viq0yr.js">
-  <link rel="modulepreload" crossorigin href="./assets/vendor-motion-bxPitwte.js">
-  <link rel="stylesheet" crossorigin href="./assets/index-CEvqCvaX.css">
+  <link rel="canonical" href="https://imranwafa.com/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://imranwafa.com/" />
+  <meta property="og:title" content="Imran Wafa · A Specimen Sheet" />
+  <meta property="og:description"
+    content="Operations & data. 24/7 NOC monitoring, infrastructure, and data-quality engineering — set like a type-specimen sheet." />
+  <meta property="og:site_name" content="imranwafa.com" />
+  <meta property="og:image" content="https://imranwafa.com/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://imranwafa.com/og.png" />
+  <meta name="twitter:title" content="Imran Wafa · A Specimen Sheet" />
+  <meta name="twitter:description"
+    content="Operations & data. 24/7 NOC monitoring, infrastructure, and data-quality engineering — set like a type-specimen sheet." />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Imran Wafa",
+    "url": "https://imranwafa.com/",
+    "email": "mailto:contact@imranwafa.com",
+    "jobTitle": "Operations Technician · Data Analyst",
+    "sameAs": [
+      "https://github.com/imranhwafa",
+      "https://www.linkedin.com/in/imran-w-9741082a3"
+    ]
+  }
+  </script>
+  <!-- Fonts are self-hosted (see @font-face in specimen.css); preload the
+       three above-the-fold families so text settles immediately. The
+       experiment fonts (Archivo, Familjen Grotesk, Syne) are lazy-loaded
+       from Google on demand by ensureFontLoaded() in motion.tsx. -->
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/space-grotesk.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/hanken-grotesk.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/jetbrains-mono.woff2" crossorigin />
+  <script type="module" crossorigin src="/assets/index-BiWnfyAh.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/vendor-react-Cl8PMded.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-core-CYPtxSLM.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-CKXfFglF.css">
 </head>
 
 <body>
@@ -59,6 +99,7 @@
        main.tsx sets window.__appReady on boot and removes the .slow class. -->
   <style>
     html { background: #fbfbfc; color: #16161a; }
+    html[data-theme="carbon"] { background: #101014; color: #e8e8ee; }
 
     #root { transition: opacity 0.5s ease; opacity: 1; }
     html.slow #root { opacity: 0 !important; pointer-events: none; }
@@ -100,7 +141,7 @@
       <p id="lite-msg">One sec, the full interactive version is still loading. Here are the essentials in the meantime.</p>
       <div class="lite-links">
         <a href="mailto:contact@imranwafa.com">contact@imranwafa.com</a>
-        <a href="https://github.com/imranwafa-com">GitHub</a>
+        <a href="https://github.com/imranhwafa">GitHub</a>
         <a href="https://www.linkedin.com/in/imran-w-9741082a3">LinkedIn</a>
       </div>
     </div>
@@ -384,7 +425,7 @@
         <h1>Imran Wafa</h1>
         <p>Operations technician: network, database &amp; data analytics</p>
         <div class="noscript-links">
-          <a href="https://github.com/imranwafa-com" class="noscript-link">GitHub</a>
+          <a href="https://github.com/imranhwafa" class="noscript-link">GitHub</a>
           <a href="https://www.linkedin.com/in/imran-w-9741082a3" class="noscript-link">LinkedIn</a>
           <a href="mailto:contact@imranwafa.com" class="noscript-link">contact@imranwafa.com</a>
         </div>
@@ -492,9 +533,9 @@
       </section>
 
       <footer class="noscript-footer">
-        © 2024 Imran Wafa. All rights reserved.<br />
+        © 2026 Imran Wafa. All rights reserved.<br />
         <span style="margin-top:8px;display:inline-block;">
-          Built with React, Framer Motion & a lot of coffee, but you're seeing the plain version ☕
+          Built with React, TypeScript & a lot of coffee, but you're seeing the plain version ☕
         </span>
       </footer>
     </div>

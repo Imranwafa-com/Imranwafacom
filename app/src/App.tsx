@@ -1,50 +1,51 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import Specimen from './specimen/Specimen';
-import Resume from './resume/Resume';
+import { ResumeSkeleton } from './resume/ResumeLoader';
 
-function AnimatedRoutes() {
+// 404 in the specimen's voice — an unknown URL is a missing folio.
+function NotFound() {
+  return (
+    <div className="notfound shell">
+      <div className="notfound-num mono">404</div>
+      <h1 className="notfound-title serif">Folio <em>not found.</em></h1>
+      <p className="notfound-sub mono">THIS PAGE ISN'T IN THE SPECIMEN · CHECK THE URL OR HEAD BACK</p>
+      <Link className="idx-link" to="/">Back to the sheet ↖</Link>
+    </div>
+  );
+}
+
+// The resume reader pulls in react-pdf + pdfjs + framer-motion (~1.9 MB);
+// load all of it only when someone actually visits /resume so the homepage
+// ships none of it. The route fade below is plain CSS for the same reason.
+const Resume = lazy(() => import('./resume/Resume'));
+
+function Fade({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route 
-          path="/" 
-          element={
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-              style={{ width: '100%', height: '100%' }}
-            >
-              <Specimen />
-            </motion.div>
-          } 
-        />
-        <Route 
-          path="/resume" 
-          element={
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-              style={{ width: '100%', height: '100%' }}
-            >
-              <Resume />
-            </motion.div>
-          } 
-        />
-      </Routes>
-    </AnimatePresence>
+    <div key={location.pathname} className="route-fade" style={{ width: '100%', height: '100%' }}>
+      {children}
+    </div>
   );
 }
 
 function App() {
   return (
     <BrowserRouter>
-      <AnimatedRoutes />
+      <Fade>
+        <Routes>
+          <Route path="/" element={<Specimen />} />
+          <Route
+            path="/resume"
+            element={
+              <Suspense fallback={<ResumeSkeleton />}>
+                <Resume />
+              </Suspense>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Fade>
     </BrowserRouter>
   );
 }
