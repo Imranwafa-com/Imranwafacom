@@ -24,6 +24,7 @@ import { Loupe, LoupeToggle } from "./loupe";
 import { REDUCED } from "./motion";
 import { Quirks } from "./quirks";
 import { currentVerb, SWITCH_EVENT } from "./switch-verb";
+import { currentTheme, toggleTheme, THEME_EVENT, type ThemeName } from "./theme";
 import { QuirksExtra } from "./quirks-extra";
 import { Tap, MicroToast, emitTap } from "./microtaps";
 import { fireRipple } from "./runtime";
@@ -51,7 +52,7 @@ function MetaBlocks({ blocks, className, speed }: { blocks: MetaBlockT[]; classN
 function DosierRow({ row }: { row: DosierRowT }) {
   return (
     <Tap as="div" className="row" copy={row.copy} msg={row.taps}
-      onTap={row.scrollTo ? () => { const el = document.getElementById(row.scrollTo!); el && window.scrollTo({ top: el.offsetTop - 60, behavior: "smooth" }); } : undefined}>
+      onTap={row.scrollTo ? () => { const el = document.getElementById(row.scrollTo!); if (el) window.scrollTo({ top: el.offsetTop - 60, behavior: "smooth" }); } : undefined}>
       <span>{row.k}</span><span>{row.v}</span>
     </Tap>
   );
@@ -100,7 +101,7 @@ function Crosshair() {
       window.removeEventListener("mouseleave", onLeave);
     };
   }, []);
-  return <div ref={ref} className={"crosshair" + (on ? " on" : "")} />;
+  return <div ref={ref} className={"crosshair" + (on ? " on" : "")} aria-hidden="true" />;
 }
 
 // ── Masthead ────────────────────────────────────────────────
@@ -136,6 +137,34 @@ function SecHead({ num, segments, meta, hint }: SecHeadProps) {
   );
 }
 
+// ── Theme toggle (masthead) — paper ⇄ carbon ────────────────
+function ThemeToggle() {
+  const [theme, setThemeState] = useState<ThemeName>(() => currentTheme());
+  const flips = useRef(0);
+  const T = COPY.masthead.theme;
+  useEffect(() => {
+    // Stay in sync when the palette (or anything else) switches the theme.
+    const on = (e: Event) => setThemeState((e as CustomEvent<ThemeName>).detail);
+    window.addEventListener(THEME_EVENT, on);
+    return () => window.removeEventListener(THEME_EVENT, on);
+  }, []);
+  const onClick = () => {
+    const next = toggleTheme();
+    flips.current++;
+    emitTap(flips.current >= 3 ? T.commitment : next === "carbon" ? T.toDark : T.toLight);
+  };
+  return (
+    <button
+      className="theme-toggle mono"
+      onClick={onClick}
+      title={T.title}
+      aria-pressed={theme === "carbon"}
+    >
+      <span className="tt-dot" aria-hidden="true" />{theme === "carbon" ? T.labelLight : T.labelDark}
+    </button>
+  );
+}
+
 function Masthead() {
   const now = useClock();
   const [hour12, setHour12] = useState(false);
@@ -156,6 +185,7 @@ function Masthead() {
         <Tap as="span" className="live" msg={M.liveTaps}>{M.liveLabel}</Tap>
         <Tap copy={fmtDate(now)} title={M.dateTitle}>{fmtDate(now)}</Tap>
         <Tap as="span" ripple={false} onTap={() => { setHour12((v) => !v); emitTap(hour12 ? M.time24Msg : M.time12Msg); }} title={M.timeTitle}>{fmtTime(now, hour12)}</Tap>
+        <ThemeToggle />
         <LoupeToggle />
       </div>
     </div>
@@ -201,7 +231,7 @@ function Hero() {
       <div className="hero-grid">
         <MetaBlocks blocks={COPY.hero.metaLeft} className="hero-meta-l" speed={0.22} />
 
-        <Parallax as="div" className="wordmark serif" speed={-0.06}>
+        <Parallax as="div" className="wordmark serif" speed={-0.06} role="heading" aria-level={1} aria-label="Imran Wafa — I build things, and I keep them running">
           <ClickCounter>
             <HeroWordmark />
           </ClickCounter>
@@ -473,6 +503,14 @@ function ProjectIndex({ tagFilter, onClearFilter }: ProjectIndexProps) {
     else { setSortKey(k); setSortDir(k === "n" || k === "title" ? "asc" : "desc"); }
   };
   const arrow = (k: string) => (sortKey === k ? (sortDir === "asc" ? " ↑" : " ↓") : "");
+  // Keyboard access for the sortable headers. No role override — a <th>
+  // is natively a columnheader, which is what aria-sort is valid on.
+  const sortableTh = (k: string) => ({
+    onClick: () => click(k),
+    onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); click(k); } },
+    tabIndex: 0,
+    "aria-sort": (sortKey === k ? (sortDir === "asc" ? "ascending" : "descending") : "none") as "ascending" | "descending" | "none",
+  });
   const maxCommits = Math.max(...PROJECTS.map((p) => p.metrics.commits));
 
   return (
@@ -490,7 +528,7 @@ function ProjectIndex({ tagFilter, onClearFilter }: ProjectIndexProps) {
           <div className="proj-summary-l">
             <TypeOnView
               tag="p" speed={14} startDelay={120} threshold={0.5}
-              segments={COPY.work.summary.map((s) => (s.text ? { ...s, text: tpl(s.text, { loc: (TOTALS.loc / 1000).toFixed(1), commits: TOTALS.commits }) } : s))}
+              segments={COPY.work.summary.map((s) => (s.text ? { ...s, text: tpl(s.text, { count: PROJECTS.length === 9 ? "Nine" : String(PROJECTS.length), loc: (TOTALS.loc / 1000).toFixed(1), commits: TOTALS.commits }) } : s))}
             />
             {tagFilter && (
               <div className="filter-pill">
@@ -518,11 +556,11 @@ function ProjectIndex({ tagFilter, onClearFilter }: ProjectIndexProps) {
         <table className="index-table">
           <thead>
             <tr className="idx-head">
-              <th onClick={() => click("n")} className="idx-num idx-th">{COPY.work.headers.num}{arrow("n")}</th>
-              <th onClick={() => click("title")} className="idx-th">{COPY.work.headers.title}{arrow("title")}</th>
+              <th {...sortableTh("n")} className="idx-num idx-th">{COPY.work.headers.num}{arrow("n")}</th>
+              <th {...sortableTh("title")} className="idx-th">{COPY.work.headers.title}{arrow("title")}</th>
               <th className="idx-th">{COPY.work.headers.desc}</th>
-              <th onClick={() => click("loc")} className="idx-th">{COPY.work.headers.loc}{arrow("loc")}</th>
-              <th onClick={() => click("commits")} className="idx-th">{COPY.work.headers.commits}{arrow("commits")}</th>
+              <th {...sortableTh("loc")} className="idx-th">{COPY.work.headers.loc}{arrow("loc")}</th>
+              <th {...sortableTh("commits")} className="idx-th">{COPY.work.headers.commits}{arrow("commits")}</th>
               <th className="idx-th idx-th-r">{COPY.work.headers.files}</th>
             </tr>
           </thead>
@@ -683,8 +721,21 @@ function WorkProjects() {
             <div className="panel-title"><Segs segs={W.title} /></div>
             <div className="panel-meta">{W.note}</div>
           </div>
-          <p className="workproj-body">{W.body}</p>
-          <a className="idx-link" href={W.ctaHref}>{W.cta}</a>
+          <div className="workproj-grid">
+            <div>
+              <p className="workproj-body">{W.body}</p>
+              <a className="idx-link" href={W.ctaHref}>{W.cta}</a>
+            </div>
+            <div className="workproj-manifest">
+              <div className="label">{W.manifestLabel}</div>
+              {W.manifest.map((r) => (
+                <Tap as="div" key={r.k} className="row" msg={r.taps}>
+                  <span>{r.k}</span><span className="redact">{r.v}</span>
+                </Tap>
+              ))}
+              <div className="workproj-manifest-foot">{W.manifestFoot}</div>
+            </div>
+          </div>
         </Reveal>
       </ZoomScroll>
     </section>
@@ -783,27 +834,29 @@ export default function Specimen() {
       <MouseAurora />
       <Crosshair />
       <Masthead />
-      <Hero />
-      <Scroller />
-      {/* ── Resume body, top to bottom ── */}
-      <About />
-      <ResumeSection id="education" num={COPY.sections.education.num} hint={COPY.sections.education.hint} segments={COPY.sections.education.title} meta={COPY.sections.education.meta} rows={EDUCATION} />
-      <ResumeSection id="certs" num={COPY.sections.certs.num} hint={COPY.sections.certs.hint} segments={COPY.sections.certs.title} meta={COPY.sections.certs.meta} rows={CERTS} />
-      <ProjectIndex tagFilter={tagFilter} onClearFilter={() => setTagFilter(null)} />
-      <ResumeSection id="experience" num={COPY.sections.experience.num} hint={COPY.sections.experience.hint} segments={COPY.sections.experience.title} meta={COPY.sections.experience.meta} rows={EXPERIENCE} />
-      <WorkProjects />
-      {/* ── Everything else ── */}
-      <Dashboard
-        tagFilter={tagFilter}
-        onSelectTag={(t) => {
-          setTagFilter(t);
-          if (t) {
-            const el = document.getElementById("work");
-            el && window.scrollTo({ top: el.offsetTop - 60, behavior: "smooth" });
-          }
-        }}
-      />
-      <Contact />
+      <main>
+        <Hero />
+        <Scroller />
+        {/* ── Resume body, top to bottom ── */}
+        <About />
+        <ResumeSection id="education" num={COPY.sections.education.num} hint={COPY.sections.education.hint} segments={COPY.sections.education.title} meta={COPY.sections.education.meta} rows={EDUCATION} />
+        <ResumeSection id="certs" num={COPY.sections.certs.num} hint={COPY.sections.certs.hint} segments={COPY.sections.certs.title} meta={COPY.sections.certs.meta} rows={CERTS} />
+        <ProjectIndex tagFilter={tagFilter} onClearFilter={() => setTagFilter(null)} />
+        <ResumeSection id="experience" num={COPY.sections.experience.num} hint={COPY.sections.experience.hint} segments={COPY.sections.experience.title} meta={COPY.sections.experience.meta} rows={EXPERIENCE} />
+        <WorkProjects />
+        {/* ── Everything else ── */}
+        <Dashboard
+          tagFilter={tagFilter}
+          onSelectTag={(t) => {
+            setTagFilter(t);
+            if (t) {
+              const el = document.getElementById("work");
+              if (el) window.scrollTo({ top: el.offsetTop - 60, behavior: "smooth" });
+            }
+          }}
+        />
+        <Contact />
+      </main>
       <Colophon />
       <IdleSequence />
       <ScrollToasts />

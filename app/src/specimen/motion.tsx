@@ -294,7 +294,7 @@ export function expLeaders() {
 }
 export function expCurrent() {
   return {
-    font: (exp.font.match(/'([^']+)'/) || [, exp.font])[1] as string,
+    font: (exp.font.match(/'([^']+)'/) || [exp.font, exp.font])[1] as string,
     mode: exp.mode,
     revealIdx: exp.revealIdx,
   };
@@ -344,7 +344,7 @@ export function TypeOnView({
     if (!doneRef.current) {
       doneRef.current = true;
       hasTypedRef.current = true;
-      onDone && onDone();
+      onDone?.();
     }
   }
 
@@ -359,7 +359,10 @@ export function TypeOnView({
       modeRef.current = exp.mode || TEXT_MODES[0];
       setCount(0);
       setWordIdx(0);
-      setScrambled(Array.from(full).map(() => ({ char: "?", done: false })));
+      // Seed with spaces, not visible glyphs — during startDelay the text
+      // should hold blank space, not a wall of "?" (visible for seconds on
+      // long-delay blocks like the bio).
+      setScrambled(Array.from(full).map(() => ({ char: " ", done: false })));
       setCascadeT(0);
       setLineIdx(0);
       doneRef.current = false;
@@ -634,7 +637,7 @@ export const parallaxEngine = (() => {
   };
 })();
 
-interface ParallaxProps {
+interface ParallaxProps extends Record<string, unknown> {
   children?: ReactNode;
   speed?: number;
   axis?: "x" | "y";
@@ -642,7 +645,7 @@ interface ParallaxProps {
   as?: ElementType;
   style?: CSSProperties;
 }
-export function Parallax({ children, speed = 0.08, axis = "y", className = "", as = "div", style }: ParallaxProps) {
+export function Parallax({ children, speed = 0.08, axis = "y", className = "", as = "div", style, ...rest }: ParallaxProps) {
   const ref = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const el = ref.current;
@@ -651,7 +654,7 @@ export function Parallax({ children, speed = 0.08, axis = "y", className = "", a
     const item = parallaxEngine.add(el, speed, axis);
     return () => parallaxEngine.remove(item);
   }, [speed, axis]);
-  return createElement(as, { ref, className, style: { willChange: "transform", ...style } }, children);
+  return createElement(as, { ref, className, style: { willChange: "transform", ...style }, ...rest }, children);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -814,6 +817,11 @@ export function StartupIntro() {
 
   useEffect(() => {
     if (REDUCED) { setPhase("gone"); return; }
+    // The intro exists to mask font loading with a moment of theatre; a
+    // returning visitor this session already has warm fonts — skip straight in.
+    try {
+      if (sessionStorage.getItem("iw_seen_intro")) { setPhase("gone"); return; }
+    } catch { /* private mode — always play it */ }
     document.documentElement.style.overflow = "hidden";
     getLenis()?.stop();
 
@@ -841,6 +849,7 @@ export function StartupIntro() {
         clearInterval(id);
         clearTimeout(safety);
         setPhase("wipe");
+        try { sessionStorage.setItem("iw_seen_intro", "1"); } catch { /* private mode */ }
         setTimeout(() => {
           setPhase("gone");
           document.documentElement.style.overflow = "";

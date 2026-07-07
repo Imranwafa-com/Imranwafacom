@@ -48,9 +48,9 @@ export const PROJECTS: Project[] = [
   },
   {
     n: "04", title: "imranwafa.com",
-    desc: "The site you're on right now. Built with React, Framer Motion, and a couple of easter eggs.",
-    long: "React and Framer Motion. iMessage-style contact page, scroll animations, a command palette if you type fast, and more easter eggs than strictly necessary.",
-    tags: ["React", "Tailwind", "TypeScript"],
+    desc: "The site you're on right now. A type-specimen sheet that happens to be a person.",
+    long: "React and TypeScript with a hand-rolled motion engine — no animation library on this page. Command palette, a blueprint loupe, and more easter eggs than strictly necessary.",
+    tags: ["React", "TypeScript", "Vite"],
     year: "2025", status: "live", type: "Web",
     link: "https://imranwafa.com",
     metrics: { loc: 4900, commits: 138, stars: 9, files: 64, deps: 29 },
@@ -128,13 +128,14 @@ export const LANG_DIST: DonutSlice[] = [
   { label: "Other", value: 12, color: "var(--ink-3)" },
 ];
 
+// Mirrors the hero dossier ("Stack: Linux · SQL · Python") — ops first.
 export const STACK_USAGE = [
-  { label: "React", value: 92 },
-  { label: "TypeScript", value: 84 },
-  { label: "Python", value: 68 },
-  { label: "Node.js", value: 61 },
-  { label: "Tailwind", value: 55 },
-  { label: "PostgreSQL", value: 38 },
+  { label: "Linux", value: 92 },
+  { label: "SQL", value: 84 },
+  { label: "Python", value: 72 },
+  { label: "React / TS", value: 61 },
+  { label: "Docker", value: 55 },
+  { label: "Power BI", value: 46 },
 ];
 
 export interface ChartSeries { label: string; color: string; data: { x: number; y: number }[] }
@@ -154,24 +155,27 @@ export const SHIP_TREND: ChartSeries[] = [
 ];
 
 export interface TagWeight { name: string; weight: number }
+// Every name here must match at least one Project.tags entry
+// (case-insensitive) — the cloud filters the index table, and a tag
+// with no matches dead-ends into an empty table.
 export const TAG_WEIGHTS: TagWeight[] = [
   { name: "React", weight: 5 },
   { name: "TypeScript", weight: 5 },
   { name: "Python", weight: 4 },
   { name: "AI", weight: 4 },
-  { name: "Node.js", weight: 3 },
+  { name: "Homelab", weight: 4 },
+  { name: "Linux", weight: 3 },
   { name: "automation", weight: 3 },
-  { name: "data", weight: 4 },
+  { name: "Networking", weight: 3 },
   { name: "C++", weight: 2 },
   { name: "Electron", weight: 2 },
-  { name: "Tailwind", weight: 3 },
-  { name: "design systems", weight: 2 },
-  { name: "Postgres", weight: 2 },
+  { name: "Proxmox", weight: 2 },
+  { name: "Docker", weight: 2 },
+  { name: "ZFS", weight: 2 },
+  { name: "Node.js", weight: 2 },
+  { name: "Storage", weight: 1 },
   { name: "CLI", weight: 1 },
-  { name: "Storybook", weight: 1 },
-  { name: "Framer Motion", weight: 2 },
-  { name: "REST", weight: 2 },
-  { name: "ML", weight: 3 },
+  { name: "pfSense", weight: 1 },
 ];
 
 export const SKILLS = [

@@ -11,6 +11,7 @@ import { sectionTimes, pageStart } from "./runtime";
 import { expCurrent, expLeaders, REDUCED } from "./motion";
 import { KEYWORD_EGGS } from "./keyword-eggs";
 import { advanceVerb } from "./switch-verb";
+import { toggleTheme } from "./theme";
 import { emitTap } from "./microtaps";
 
 const CFG = SITE;
@@ -212,6 +213,7 @@ const COMMANDS: Command[] = [
   { cmd: "/github", action: "github", desc: CFG.commandPalette.commandDescriptions.github },
   { cmd: "/linkedin", action: "linkedin", desc: CFG.commandPalette.commandDescriptions.linkedin },
   { cmd: "/secret", action: "secret", desc: CFG.commandPalette.commandDescriptions.secret },
+  { cmd: "/theme", action: "theme", desc: "flip the lights (paper ⇄ carbon)" },
   { cmd: "/inspect", action: "inspect", desc: "examine the page under a blueprint loupe" },
   { cmd: "/debug", action: "debug", desc: "toggle the dev debug overlay" },
   { cmd: "/clear", action: "close", desc: CFG.commandPalette.commandDescriptions.clear },
@@ -269,7 +271,7 @@ export function CommandPalette({ openTldr }: { openTldr: () => void }) {
   const run = (c: Command) => {
     if (c.action === "scroll") {
       const el = c.target === "top" ? document.body : document.getElementById(c.target!);
-      el && window.scrollTo({ top: c.target === "top" ? 0 : (el as HTMLElement).offsetTop - 60, behavior: "smooth" });
+      if (el) window.scrollTo({ top: c.target === "top" ? 0 : (el as HTMLElement).offsetTop - 60, behavior: "smooth" });
       close();
     } else if (c.action === "tldr") {
       close();
@@ -307,6 +309,10 @@ export function CommandPalette({ openTldr }: { openTldr: () => void }) {
     } else if (c.action === "switch") {
       advanceVerb();
       setQuery("");
+    } else if (c.action === "theme") {
+      const next = toggleTheme();
+      emitTap(next === "carbon" ? COPY.masthead.theme.toDark : COPY.masthead.theme.toLight);
+      close();
     } else if (c.action === "close") {
       close();
     }
@@ -633,7 +639,7 @@ export function LiveKpi() {
 
   const cur = expCurrent();
   const lead = expLeaders();
-  const leadFont = lead.font.k ? (lead.font.k.match(/'([^']+)'/) || [, lead.font.k])[1] : "—";
+  const leadFont = lead.font.k ? (lead.font.k.match(/'([^']+)'/) || [lead.font.k, lead.font.k])[1] : "—";
 
   return (
     <div className="livekpi">

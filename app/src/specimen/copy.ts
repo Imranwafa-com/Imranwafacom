@@ -50,6 +50,14 @@ export const COPY = {
     time24Msg: "24-hour time",
     timeTitle: "(tap: 12/24h)",
     dateTitle: "(tap to copy)",
+    theme: {
+      title: "flip the lights",
+      toDark: "lights off.",
+      toLight: "lights on.",
+      commitment: "theme commitment issues, huh?",
+      labelDark: "dark",
+      labelLight: "light",
+    },
   },
 
   // ── Hero ──────────────────────────────────────────────────
@@ -60,7 +68,7 @@ export const COPY = {
       { k: "EST.", v: "MMXX", taps: ["MMXX = 2020. been a minute.", "established mid-pandemic. as one does."] },
     ] as MetaBlock[],
     metaRight: [
-      { k: "FOLIO N°", v: "001 / 006", taps: ["folio one of six. keep scrolling.", "you are here. roughly."] },
+      { k: "FOLIO N°", v: "001 / 008", taps: ["folio one of eight. keep scrolling.", "you are here. roughly."] },
       { k: "EDITION", v: "v0.0.1 · MMXXVI", taps: ["v0.0.1: still very much zero-point-zero.", "MMXXVI = 2026. yes, already."] },
       { k: "FORMAT", v: "Specimen sheet", taps: ["a type-specimen, but for a person.", "format: printed-page energy, on the web."] },
     ] as MetaBlock[],
@@ -94,7 +102,7 @@ export const COPY = {
       { label: "Uptime sustained", value: "99.9", unit: "%" },
       { label: "MTTD cut", value: "30", unit: "%" },
       { label: "Daily volume", value: "$2B+", unit: "/day" },
-      { label: "Dedup accuracy", value: "23", unit: "%" },
+      { label: "Dedup accuracy lift", value: "23", unit: "%" },
       { label: "Years in ops / data", value: "5", unit: "yrs" },
     ] as KpiStat[],
   },
@@ -125,7 +133,7 @@ export const COPY = {
   // ── Dashboard panels ──────────────────────────────────────
   dash: {
     cadence: { title: [{ text: "Shipping " }, { text: "cadence", className: "it" }] as Seg[], meta: "PROJECTS / YEAR", footShipped: "● shipped", footStarted: "○ started" },
-    languages: { title: [{ text: "Languages", className: "it" }, { text: " by share" }] as Seg[], meta: "% OF LoC", foot: "SAMPLED ACROSS 6 ACTIVE REPOS" },
+    languages: { title: [{ text: "Languages", className: "it" }, { text: " by share" }] as Seg[], meta: "% OF LoC", foot: "SAMPLED ACROSS ACTIVE REPOS" },
     stack: { title: [{ text: "Stack " }, { text: "usage", className: "it" }] as Seg[], meta: "% OF PROJECTS" },
     activity: { title: [{ text: "Activity", className: "it" }, { text: " · 26 wks" }] as Seg[], meta: "COMMITS", less: "less", more: "more" },
     topics: { title: [{ text: "Topic " }, { text: "cloud", className: "it" }] as Seg[], meta: "WEIGHTED", footIdle: "CLICK A TAG TO FILTER THE PROJECTS ABOVE", footActivePrefix: "filtering projects by ", footActiveSuffix: " · click again to clear" },
@@ -140,7 +148,7 @@ export const COPY = {
   work: {
     metaTemplate: "{shown} OF {total} ENTRIES · {commits} COMMITS",
     summary: [
-      { text: "Six projects, " },
+      { text: "{count} projects, " },
       { text: "{loc}k lines", className: "tag-em" },
       { text: ", " },
       { text: "{commits} commits", className: "tag-em" },
@@ -156,13 +164,21 @@ export const COPY = {
     detail: { year: "Year", type: "Type", status: "Status", stack: "Stack", loc: "LoC", commits: "Commits", files: "Files", link: "View source ↗" },
   },
 
-  // ── Work projects (placeholder) ───────────────────────────
+  // ── Work projects (NDA'd — shown as a redacted manifest) ──
   workProjects: {
     title: [{ text: "Client & " }, { text: "team work.", className: "it" }] as Seg[],
     body: "Most of my professional work lives behind NDAs and locked-down systems: NOC monitoring, dashboards, internal tooling, and data pipelines built on the clock. Case studies are available on request.",
-    note: "Coming soon",
+    note: "Under NDA",
     cta: "Request the details ↗",
     ctaHref: "mailto:contact@imranwafa.com?subject=Work%20projects",
+    manifestLabel: "Manifest · partial",
+    manifest: [
+      { k: "Monitoring & alerting", v: "██████ · in prod", taps: ["the good kind of pager silence.", "it pages before the users notice."] },
+      { k: "KPI dashboards", v: "████ · Power BI", taps: ["the wall of charts the shift actually reads."] },
+      { k: "Data pipelines", v: "█████ · nightly", taps: ["ETL that survives bad inputs. mostly."] },
+      { k: "Runbooks & tooling", v: "███ · internal", taps: ["written so 3am-me can follow them."] },
+    ],
+    manifestFoot: "details redacted · ask nicely",
   },
 
   // ── About / dossier ───────────────────────────────────────

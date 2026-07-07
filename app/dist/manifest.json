@@ -1,11 +1,11 @@
 {
   "name": "Imran Wafa — A Specimen Sheet",
   "short_name": "Imran Wafa",
-  "description": "Developer & data analyst. An editorial specimen-sheet portfolio — projects, metrics, and craft.",
+  "description": "Operations & data. 24/7 NOC monitoring, infrastructure, and data-quality engineering — set like a type-specimen sheet.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f4f4f6",
-  "theme_color": "#f4f4f6",
+  "background_color": "#fbfbfc",
+  "theme_color": "#fbfbfc",
   "orientation": "portrait-primary",
   "icons": [
     {

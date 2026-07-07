@@ -1,36 +1,39 @@
 # ImranWafa.com 0.0.1
 
-Personal portfolio website monorepo.
+Personal portfolio website monorepo. The **live site is `app/`** — a single-page
+editorial "specimen sheet" (Vite + React 19 + TypeScript). `portfolio/` is an
+older Next.js iMessage-style variant kept for reference, not deployed.
 
-## Project Structure
+## app/ — the live site
 
-- `app/` - Main portfolio app (Vite + React 19 + TypeScript + Tailwind CSS 3 + shadcn/ui)
-  - React Router for navigation (/, /about, /projects, /contact)
-  - Framer Motion for animations
-  - Vercel Speed Insights
-- `portfolio/` - Next.js 14 portfolio variant (React 18 + TypeScript + Tailwind CSS 3)
-  - App Router
-  - Contact form API route with Nodemailer
+- `src/specimen/` is the entire homepage. `App.tsx` routes `/` → `Specimen` and
+  `/resume` → a **lazy-loaded** react-pdf reader (keep it lazy — it pulls in
+  pdfjs + framer-motion, ~1.9 MB).
+- No Tailwind, no shadcn, no animation library on the homepage: styling is
+  hand-written `specimen.css` with OKLCH tokens; motion is the custom engine in
+  `specimen/motion.tsx`.
+- Themes: `paper` (light, default) and `carbon` (dark) via `[data-theme]` token
+  overrides in `specimen.css`; switching lives in `specimen/theme.ts`
+  (persisted to `localStorage.iw_theme`, restored pre-paint by an inline script
+  in `index.html`, broadcast on the `iw-theme` event).
+- All user-facing copy in `specimen/copy.ts`; structured records in
+  `specimen/data.ts`; feature/easter-egg strings in `specimen/site-config.ts`.
+- Scroll-perf rule: never `getBoundingClientRect()` or `setState` on the scroll
+  path — see the cached-offset pattern in `motion.tsx` before touching any
+  scroll-linked effect.
+- `npm run build` runs `tsc -b` but NOT eslint; lint has ~39 pre-existing
+  errors from the deliberate ref-based motion architecture.
 
 ## Commands
 
-### app/
 ```bash
-cd app && npm run dev      # Start dev server (Vite)
+cd app && npm run dev      # Vite dev server (5173)
 cd app && npm run build    # TypeScript check + Vite build
 cd app && npm run lint     # ESLint
 ```
 
-### portfolio/
-```bash
-cd portfolio && npm run dev    # Start Next.js dev server
-cd portfolio && npm run build  # Next.js build
-cd portfolio && npm run lint   # Next.js lint
-```
+## Content consistency
 
-## Key Conventions
-
-- Tailwind CSS for styling with dark mode support (`dark:` prefix)
-- shadcn/ui components in `app/src/components/ui/`
-- Config-driven content in `app/src/lib/config.ts` and `app/src/config/`
-- Page components in `app/src/pages/`, section components in `app/src/sections/`
+Experience/projects data exists in three places that must stay in sync:
+`app/src/specimen/data.ts`, the `<noscript>` resume in `app/index.html`, and
+`app/public/resume.pdf` (plus the panel copy on `/resume`).

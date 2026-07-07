@@ -81,7 +81,7 @@
   z-index: 30;
   width: 232px;
   padding: 20px 20px 16px;
-  background: oklch(0.985 0.001 250 / 0.74);
+  background: oklch(from var(--paper) l c h / 0.74);
   backdrop-filter: blur(14px) saturate(1.2);
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
   border: 1px solid var(--rule);
@@ -159,7 +159,7 @@
   width: 320px;
   max-width: calc(100vw - 48px);
   padding: 22px 22px 20px;
-  background: oklch(0.985 0.001 250 / 0.78);
+  background: oklch(from var(--paper) l c h / 0.78);
   backdrop-filter: blur(14px) saturate(1.2);
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
   border: 1px solid var(--rule);
