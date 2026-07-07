@@ -183,6 +183,7 @@ export const SKILLS = [
   { label: "Systems & Networking", items: "Linux, TCP/IP, DNS, DHCP, switches & routers, monitoring & alerting" },
   { label: "Data Center & Hardware", items: "Rack & stack, component diagnostics, cabling, RMA & lifecycle" },
   { label: "Data & Reporting", items: "SQL, Python, Power BI, ETL/ELT, AWS, Snowflake, KPI dashboards" },
+  { label: "Languages", items: "English, Spanish, Farsi, Tajiki, Dari, Pashto, Russian, Arabic" },
 ];
 
 // Resume entries — Education / Certs / Experience share one shape and

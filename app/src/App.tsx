@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import Specimen from './specimen/Specimen';
+import { ResumeSkeleton } from './resume/ResumeLoader';
 
 // 404 in the specimen's voice — an unknown URL is a missing folio.
 function NotFound() {
@@ -37,7 +38,7 @@ function App() {
           <Route
             path="/resume"
             element={
-              <Suspense fallback={null}>
+              <Suspense fallback={<ResumeSkeleton />}>
                 <Resume />
               </Suspense>
             }

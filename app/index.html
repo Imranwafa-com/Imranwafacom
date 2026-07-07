@@ -94,8 +94,24 @@
        within 3s, show a tiny critical hero + contact so the page is never blank.
        main.tsx sets window.__appReady on boot and removes the .slow class. -->
   <style>
-    html { background: #fbfbfc; color: #16161a; }
-    html[data-theme="carbon"] { background: #101014; color: #e8e8ee; }
+    /* Fallback-chrome tokens, kept in sync with --paper/--ink/--accent in
+       specimen.css but declared here so they exist BEFORE that stylesheet
+       loads (the whole point of the slow-load path). Carbon overrides below. */
+    :root {
+      --lite-bg: #fbfbfc;
+      --lite-ink: #0b0d13;
+      --lite-mute: #777a82;
+      --lite-accent: #194fe3;
+      --lite-rule: rgba(11, 13, 19, 0.16);
+    }
+    html[data-theme="carbon"] {
+      --lite-bg: #101014;
+      --lite-ink: #e6e8ec;
+      --lite-mute: #71747b;
+      --lite-accent: #6097ff;
+      --lite-rule: rgba(230, 232, 236, 0.18);
+    }
+    html { background: var(--lite-bg); color: var(--lite-ink); }
 
     #root { transition: opacity 0.5s ease; opacity: 1; }
     html.slow #root { opacity: 0 !important; pointer-events: none; }
@@ -112,23 +128,23 @@
     .lite-inner { max-width: 640px; width: 100%; }
     .lite-inner .mono {
       font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px;
-      letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; margin-bottom: 24px;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--lite-mute); margin-bottom: 24px;
     }
     .lite-inner h1 {
       font-size: clamp(48px, 10vw, 88px); line-height: 0.95; letter-spacing: -0.04em;
       margin: 0; font-weight: 500;
     }
-    .lite-inner h1 em { font-style: italic; color: #5064ff; font-weight: 400; }
+    .lite-inner h1 em { font-style: italic; color: var(--lite-accent); font-weight: 400; }
 
     .lite-inner p {
-      font-size: 18px; opacity: 0.7; margin: 24px 0 32px; max-width: 48ch; line-height: 1.5;
+      font-size: 18px; color: var(--lite-mute); margin: 24px 0 32px; max-width: 48ch; line-height: 1.5;
     }
     .lite-links { display: flex; gap: 24px; flex-wrap: wrap; }
     .lite-links a {
-      font-size: 15px; color: inherit; text-decoration: none;
-      border-bottom: 1px solid rgba(128,128,128,0.3); padding-bottom: 2px; transition: border-color 0.2s;
+      font-size: 15px; color: var(--lite-ink); text-decoration: none;
+      border-bottom: 1px solid var(--lite-rule); padding-bottom: 2px; transition: border-color 0.2s;
     }
-    .lite-links a:hover { border-bottom-color: currentColor; }
+    .lite-links a:hover { border-bottom-color: var(--lite-accent); }
   </style>
   <div id="lite" aria-hidden="true">
     <div class="lite-inner">
@@ -171,8 +187,8 @@
 
       body {
         font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        background: #fafafa;
-        color: #1a1a2e;
+        background: #fbfbfc;
+        color: #0b0d13;
         line-height: 1.6;
         padding: 0;
         min-height: 100vh;
@@ -180,8 +196,8 @@
 
       @media (prefers-color-scheme: dark) {
         body {
-          background: #0a0a14;
-          color: #e0e4f0;
+          background: #101014;
+          color: #e6e8ec;
         }
 
         .noscript-card {
@@ -194,26 +210,26 @@
         }
 
         .noscript-tag {
-          background: rgba(103, 232, 249, 0.08) !important;
-          color: #67e8f9 !important;
+          background: rgba(96, 151, 255, 0.08) !important;
+          color: #6097ff !important;
         }
 
         .noscript-section-title {
-          color: #67e8f9 !important;
+          color: #6097ff !important;
         }
 
         .noscript-timeline-dot {
-          background: #67e8f9 !important;
+          background: #6097ff !important;
         }
 
         .noscript-link {
-          color: #60a5fa !important;
+          color: #6097ff !important;
         }
 
         .noscript-banner {
-          background: rgba(103, 232, 249, 0.06) !important;
-          border-color: rgba(103, 232, 249, 0.15) !important;
-          color: #67e8f9 !important;
+          background: rgba(96, 151, 255, 0.06) !important;
+          border-color: rgba(96, 151, 255, 0.15) !important;
+          color: #6097ff !important;
         }
       }
 
@@ -228,10 +244,10 @@
         padding: 16px 24px;
         margin-bottom: 40px;
         border-radius: 12px;
-        background: rgba(103, 232, 249, 0.06);
-        border: 1px solid rgba(103, 232, 249, 0.15);
+        background: rgba(96, 151, 255, 0.06);
+        border: 1px solid rgba(96, 151, 255, 0.15);
         font-size: 14px;
-        color: #475569;
+        color: #777a82;
         line-height: 1.5;
       }
 
@@ -251,7 +267,7 @@
 
       .noscript-header p {
         font-size: 16px;
-        color: #64748b;
+        color: #777a82;
       }
 
       .noscript-header .noscript-links {
@@ -263,7 +279,7 @@
       }
 
       .noscript-link {
-        color: #3b82f6;
+        color: #194fe3;
         text-decoration: none;
         font-size: 14px;
         font-weight: 500;
@@ -283,7 +299,7 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: #3b82f6;
+        color: #194fe3;
         margin-bottom: 16px;
       }
 
@@ -304,7 +320,7 @@
 
       .noscript-card p {
         font-size: 14px;
-        color: #64748b;
+        color: #777a82;
         margin-bottom: 10px;
       }
 
@@ -318,8 +334,8 @@
         font-size: 11px;
         padding: 3px 10px;
         border-radius: 999px;
-        background: rgba(59, 130, 246, 0.08);
-        color: #3b82f6;
+        background: rgba(25, 79, 227, 0.08);
+        color: #194fe3;
         font-weight: 500;
       }
 
@@ -350,7 +366,7 @@
 
       .noscript-skill-card p {
         font-size: 13px;
-        color: #64748b;
+        color: #777a82;
       }
 
       .noscript-timeline-item {
@@ -363,7 +379,7 @@
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: #3b82f6;
+        background: #194fe3;
         margin-top: 6px;
         flex-shrink: 0;
       }
@@ -375,13 +391,13 @@
 
       .noscript-timeline-content .noscript-period {
         font-size: 12px;
-        color: #94a3b8;
+        color: #9a9da4;
         margin-bottom: 4px;
       }
 
       .noscript-timeline-content p {
         font-size: 13px;
-        color: #64748b;
+        color: #777a82;
       }
 
       .noscript-footer {
@@ -390,7 +406,7 @@
         padding-top: 24px;
         border-top: 1px solid rgba(0, 0, 0, 0.06);
         font-size: 12px;
-        color: #94a3b8;
+        color: #9a9da4;
       }
 
       @media print {
@@ -429,7 +445,7 @@
 
       <section class="noscript-section">
         <div class="noscript-section-title">About</div>
-        <p style="font-size:14px;color:#64748b;line-height:1.7;">
+        <p style="font-size:14px;color:#777a82;line-height:1.7;">
           I'm an operations technician with 5+ years across network and database operations, 24/7 infrastructure
           monitoring, and data-quality engineering, keeping mission-critical systems up to strict uptime and SLA
           targets, then turning the data into dashboards people can act on. When I'm not watching a NOC queue, you'll

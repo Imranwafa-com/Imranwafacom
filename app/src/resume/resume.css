@@ -57,6 +57,9 @@
   border-radius: 3px;
 }
 
+/* The branded loader (.resume-loader*) lives in specimen.css so the eager
+   route skeleton can render it before this lazy stylesheet loads. */
+
 .resume-status {
   font-family: var(--mono);
   font-size: 13px;
@@ -86,7 +89,7 @@
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
   border: 1px solid var(--rule);
   border-radius: 14px;
-  box-shadow: 0 14px 44px -18px oklch(0.16 0.012 264 / 0.42);
+  box-shadow: var(--shadow-3);
 }
 
 .resume-spec-mark {
@@ -164,7 +167,7 @@
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
   border: 1px solid var(--rule);
   border-radius: 14px;
-  box-shadow: 0 14px 44px -18px oklch(0.16 0.012 264 / 0.42);
+  box-shadow: var(--shadow-3);
 }
 
 .resume-panel-kicker {

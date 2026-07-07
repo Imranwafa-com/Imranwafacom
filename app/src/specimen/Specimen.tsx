@@ -15,7 +15,7 @@ import type { Seg } from "./motion";
 import { Sparkline, BarRow, Donut, Heatmap, Stat, LineChart, TagCloud, RadarChart, BubbleChart, RadialGauge, WaffleChart } from "./charts";
 import {
   MouseAurora, useSectionTracker, ScrollToasts, ClickCounter,
-  CommandPalette, TldrModal, SourceEgg, LiveKpi, DebugHUD, consoleEgg,
+  CommandPalette, TldrModal, SourceEgg, DebugHUD, consoleEgg,
 } from "./features";
 import { IdleSequence } from "./idle";
 import { InteractiveBG } from "./bg";
@@ -865,7 +865,6 @@ export default function Specimen() {
       <Quirks />
       <QuirksExtra />
       <MicroToast />
-      <LiveKpi />
       <DebugHUD />
       <button id="tldr-modal-trigger" style={{ display: "none" }} onClick={() => setTldrOpen(true)} />
       <SpeedInsights />
