@@ -1,6 +1,0 @@
-[     231ms] [LOG] %cHey there, curious dev! font: 600 18px serif; color: #4f6bff; @ http://localhost:4173/assets/index-BXH7ZNsi.js:2
-[     231ms] [LOG] %cLooking at my code? No worries — it's all open source. font: 13px monospace; color: #2a2620; @ http://localhost:4173/assets/index-BXH7ZNsi.js:2
-[     232ms] [LOG] %cBuilt with React + Vite + a lot of coffee. font: 11px monospace; color: #6a6358; @ http://localhost:4173/assets/index-BXH7ZNsi.js:2
-[     232ms] [LOG] %cIf you're a recruiter… yes, I wrote this myself. font-style: italic; color: #6a6358; @ http://localhost:4173/assets/index-BXH7ZNsi.js:2
-[     251ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:4173/_vercel/speed-insights/script.js:0
-[     252ms] [LOG] [Vercel Speed Insights] Failed to load script from /_vercel/speed-insights/script.js. Please check if any content blockers are enabled and try again. @ http://localhost:4173/assets/vendor-react-wIRJKOsj.js:8
