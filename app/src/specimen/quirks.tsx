@@ -86,7 +86,7 @@ function DoubleClickBurst() {
   useEffect(() => {
     const onDbl = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.closest("a, button, input, .palette, .livekpi, .twk-panel")) return;
+      if (target.closest("a, button, input, .palette, .twk-panel")) return;
       fireRipple(e.clientX, e.clientY);
       setTimeout(() => fireRipple(e.clientX, e.clientY), 130);
     };

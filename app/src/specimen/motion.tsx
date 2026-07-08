@@ -283,15 +283,6 @@ if (typeof window !== "undefined" && !REDUCED) {
   setInterval(() => _expSave(_expStore), 5000);
 }
 
-export function expLeaders() {
-  const lead = (cat: string) => {
-    const d = _expStore[cat] || {};
-    let best: string | null = null, bestAvg = -1, n = 0;
-    for (const k in d) { const a = d[k].n ? d[k].ms / d[k].n : 0; if (a > bestAvg) { bestAvg = a; best = k; n = d[k].n; } }
-    return { k: best, avgS: Math.round(bestAvg / 1000), n };
-  };
-  return { font: lead("font"), mode: lead("mode"), reveal: lead("reveal") };
-}
 export function expCurrent() {
   return {
     font: (exp.font.match(/'([^']+)'/) || [exp.font, exp.font])[1] as string,

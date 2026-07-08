@@ -18,13 +18,3 @@ export function ResumeLoader() {
     </div>
   );
 }
-
-// Full-screen skeleton used while the lazy /resume chunk itself downloads —
-// the dot-grid + centered loader, so the route never flashes an empty frame.
-export function ResumeSkeleton() {
-  return (
-    <div className="route-skeleton">
-      <ResumeLoader />
-    </div>
-  );
-}

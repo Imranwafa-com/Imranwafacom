@@ -215,7 +215,7 @@ const ACCENT_SEL = [
   ".contact-row:hover .arrow-big", ".proj-summary-l p em", ".proj-summary-l .tag-em",
   ".panel-title .it", ".tldr-modal h3 em", ".tag.tag-w5", ".tag:hover",
   ".bar-row.bar-active .bar-label", ".bar-row.bar-active .bar-value",
-  ".heatmap-detail", ".heatmap-detail strong", ".livekpi-exp-row.best .v",
+  ".heatmap-detail", ".heatmap-detail strong",
   ".filter-pill strong", ".toast-speed",
 ].join(",");
 const SPOT_R = 340; // keep in sync with the gradient radius in specimen.css
