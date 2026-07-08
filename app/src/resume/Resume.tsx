@@ -32,7 +32,7 @@ const MOBILE_MQ = '(max-width: 640px)';
 // re-renders once after a resize settles, not on every intermediate frame.
 function calcPageW() {
   const vw = window.innerWidth;
-  if (window.matchMedia(MOBILE_MQ).matches) return Math.min(vw * 0.9, (window.innerHeight - 150) / 1.3);
+  if (vw <= 640) return Math.min(vw * 0.9, (window.innerHeight - 150) / 1.3);
   return Math.min(vw * 0.82, 760);
 }
 

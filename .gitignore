@@ -38,3 +38,4 @@ pnpm-debug.log*
 .turbo
 .cache
 Thumbs.db
+change.md

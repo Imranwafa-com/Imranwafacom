@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { SITE } from "./site-config";
 import { COPY } from "./copy";
 import { sectionTimes, pageStart } from "./runtime";
-import { expCurrent, expLeaders, REDUCED } from "./motion";
+import { expCurrent, REDUCED } from "./motion";
 import { KEYWORD_EGGS } from "./keyword-eggs";
 import { advanceVerb } from "./switch-verb";
 import { toggleTheme } from "./theme";
@@ -587,86 +587,6 @@ export function DebugHUD() {
         ))}
       </div>
       <div className="debug-hud-foot">ctrl + ` to toggle · /debug</div>
-    </div>
-  );
-}
-
-// ── LiveKpi — floating panel with live session metrics ──────
-export function LiveKpi() {
-  const [open, setOpen] = useState(false);
-  const [, force] = useState(0);
-  const mouseDist = useRef(0);
-  const lastPos = useRef<{ x: number; y: number } | null>(null);
-  const clicks = useRef(0);
-  const scrollMax = useRef(0);
-
-  useEffect(() => {
-    const id = setInterval(() => force((n) => n + 1), 1000);
-    const onMove = (e: MouseEvent) => {
-      if (lastPos.current) {
-        const dx = e.clientX - lastPos.current.x;
-        const dy = e.clientY - lastPos.current.y;
-        mouseDist.current += Math.sqrt(dx * dx + dy * dy);
-      }
-      lastPos.current = { x: e.clientX, y: e.clientY };
-    };
-    const onClick = () => { clicks.current++; };
-    const onScroll = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
-      if (pct > scrollMax.current) scrollMax.current = pct;
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    window.addEventListener("click", onClick);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      clearInterval(id);
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("click", onClick);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, []);
-
-  const fps = useFps(open); // only sample FPS while the panel is open
-  const seconds = Math.floor((Date.now() - pageStart) / 1000);
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  const dist = (mouseDist.current / 1000).toFixed(2);
-
-  if (!open) {
-    return <button className="livekpi-toggle" onClick={() => setOpen(true)} title="show session stats">◉ LIVE</button>;
-  }
-
-  const cur = expCurrent();
-  const lead = expLeaders();
-  const leadFont = lead.font.k ? (lead.font.k.match(/'([^']+)'/) || [lead.font.k, lead.font.k])[1] : "—";
-
-  return (
-    <div className="livekpi">
-      <div className="livekpi-head">
-        <span className="dot-pulse" />
-        <span>SESSION · LIVE</span>
-        <button onClick={() => setOpen(false)} aria-label="hide">−</button>
-      </div>
-      <div className="livekpi-grid">
-        <div><span className="k">on page</span><span className="v">{m}:{String(s).padStart(2, "0")}</span></div>
-        <div><span className="k">scroll</span><span className="v">{Math.round(scrollMax.current)}%</span></div>
-        <div><span className="k">mouse</span><span className="v">{dist}m</span></div>
-        <div><span className="k">clicks</span><span className="v">{clicks.current}</span></div>
-        <div><span className="k">fps</span><span className="v">{fps}</span></div>
-        <div><span className="k">view</span><span className="v">{window.innerWidth}×{window.innerHeight}</span></div>
-      </div>
-      <div className="livekpi-exp">
-        <div className="livekpi-exp-head">A/B · SHOWING</div>
-        <div className="livekpi-exp-row"><span className="k">font</span><span className="v">{cur.font}</span></div>
-        <div className="livekpi-exp-row"><span className="k">anim</span><span className="v">{cur.mode}</span></div>
-        {lead.font.n > 0 && (
-          <div className="livekpi-exp-row best">
-            <span className="k">best</span>
-            <span className="v">{leadFont} · {lead.mode.k} · {lead.font.avgS}s</span>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
