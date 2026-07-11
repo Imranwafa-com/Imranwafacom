@@ -18,10 +18,10 @@ function TabWatcher() {
   useEffect(() => {
     const orig = document.title;
     const msgs = COPY.quirks.tabAway;
-    let i = 0;
+    let fired = false; // once per visit — novelty without polluting every history entry
     const onVis = () => {
-      if (document.hidden) document.title = msgs[i++ % msgs.length];
-      else document.title = orig;
+      if (document.hidden && !fired) { fired = true; document.title = msgs[0]; }
+      else if (!document.hidden) document.title = orig;
     };
     document.addEventListener("visibilitychange", onVis);
     return () => { document.removeEventListener("visibilitychange", onVis); document.title = orig; };

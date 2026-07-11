@@ -120,16 +120,8 @@ function QuirksGroup1() {
 }
 
 function QuirksGroup2() {
-  // 11. MouseRestBored: Complains if mouse rests too long.
-  useEffect(() => {
-    let tmr: ReturnType<typeof setTimeout>;
-    const onMove = () => {
-      clearTimeout(tmr);
-      tmr = setTimeout(() => emitTap("Mouse is sleeping..."), 30000);
-    };
-    window.addEventListener("mousemove", onMove);
-    return () => { clearTimeout(tmr); window.removeEventListener("mousemove", onMove); };
-  }, []);
+  // (11. MouseRestBored removed — IdleSequence owns idle state; a 30s mouse-rest
+  //  toast fired while people were simply reading.)
 
   // 12. WindowResizeOops: Notices fast resizing.
   useEffect(() => {
@@ -218,28 +210,11 @@ function QuirksGroup2() {
     return () => document.removeEventListener("click", onClick);
   }, []);
 
-  // 19. RightClickConfused: Reacts to context menu.
-  useEffect(() => {
-    const onCtx = () => emitTap("Looking for source code?");
-    document.addEventListener("contextmenu", onCtx);
-    return () => document.removeEventListener("contextmenu", onCtx);
-  }, []);
+  // (19. RightClickConfused removed — right-click is how people copy, open in
+  //  new tabs, and inspect; commenting on it added nothing.)
 
-  // 20. FastScrollFire: Detects extreme scroll speed.
-  useEffect(() => {
-    let last = window.scrollY;
-    let tmr: ReturnType<typeof setTimeout>;
-    const onScroll = () => {
-      const now = window.scrollY;
-      if (Math.abs(now - last) > 1000) {
-        clearTimeout(tmr);
-        tmr = setTimeout(() => emitTap("Speed demon!"), 100);
-      }
-      last = now;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { clearTimeout(tmr); window.removeEventListener("scroll", onScroll); };
-  }, []);
+  // (20. FastScrollFire removed — ScrollToasts already owns the fast-scroll
+  //  gesture; two systems toasting one flick collided.)
 
   return null;
 }
@@ -292,20 +267,8 @@ function QuirksGroup3() {
     return () => { clearTimeout(tmr); window.removeEventListener("keydown", onKey); };
   }, []);
 
-  // 25. IdleNudge: a single gentle toast after a long idle (the page-wide DRIFT/
-  // DEEP dimming is already owned by IdleSequence — don't fight it by dimming
-  // <body>, which also stacks with other quirks' body styles).
-  useEffect(() => {
-    let tmr: ReturnType<typeof setTimeout>;
-    const reset = () => {
-      clearTimeout(tmr);
-      tmr = setTimeout(() => emitTap("Still there?"), 120000);
-    };
-    window.addEventListener("mousemove", reset, { passive: true });
-    window.addEventListener("keydown", reset);
-    reset();
-    return () => { clearTimeout(tmr); window.removeEventListener("mousemove", reset); window.removeEventListener("keydown", reset); };
-  }, []);
+  // (25. IdleNudge removed — IdleSequence owns idle; its 120s toast landed on
+  //  top of the already-dimmed screensaver.)
 
   // 26. DragNotice: Notices you dragging things.
   useEffect(() => {
@@ -314,12 +277,8 @@ function QuirksGroup3() {
     return () => document.removeEventListener("dragstart", onDrag);
   }, []);
 
-  // 27. EscapeKeySigh: Reacts to Esc key.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") emitTap("No escape."); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  // (27. EscapeKeySigh removed — it fired on the same Escape that closes the
+  //  palette and tldr modal, colliding with the dismiss gesture.)
 
   // 28. EnterKeyPop: Enter key fires ripple.
   useEffect(() => {
@@ -332,16 +291,7 @@ function QuirksGroup3() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // 29. BackspaceErase: Backspace panic outside inputs.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Backspace" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
-        emitTap("Can't delete the page!");
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  // (29. BackspaceErase removed — commenting on a normal keystroke.)
 
   // 30. ScrollDirectionChange: Notices indecision.
   useEffect(() => {
@@ -369,15 +319,8 @@ function QuirksGroup3() {
 }
 
 function QuirksGroup4() {
-  // 31. CursorLeave: Pleads when cursor leaves window.
-  useEffect(() => {
-    const orig = document.title;
-    const onOut = (e: MouseEvent) => { if (!e.relatedTarget && e.clientY <= 0) document.title = "Come back!"; };
-    const onIn = () => { document.title = orig; };
-    document.addEventListener("mouseout", onOut);
-    document.addEventListener("mouseover", onIn);
-    return () => { document.removeEventListener("mouseout", onOut); document.removeEventListener("mouseover", onIn); document.title = orig; };
-  }, []);
+  // (31. CursorLeave removed — mutating the tab title because the cursor grazed
+  //  the top edge polluted history entries; TabWatcher covers tab-away, once.)
 
   // 32. FocusLost: gentle note when the window loses focus.
   // NOTE: do NOT put `filter`/`transform` on <body> — it establishes a containing
@@ -420,21 +363,8 @@ function QuirksGroup4() {
   // 37. KonamiReset / 38. EndReached / 39. KonamiDance → see KEYWORD_EGGS
   //     (routed through the command palette).
 
-  // 40. TabKeyCycle: Complains about tab cycling too much.
-  useEffect(() => {
-    let count = 0;
-    let tmr: ReturnType<typeof setTimeout>;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Tab") {
-        count++;
-        clearTimeout(tmr);
-        tmr = setTimeout(() => count = 0, 2000);
-        if (count > 10) { emitTap("Tabbing a lot?"); count = 0; }
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => { clearTimeout(tmr); window.removeEventListener("keydown", onKey); };
-  }, []);
+  // (40. TabKeyCycle removed — Tab is THE navigation key for keyboard and
+  //  screen-reader users; heckling them for using it was indefensible.)
 
   return null;
 }

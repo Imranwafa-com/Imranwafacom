@@ -19,11 +19,6 @@ export function emitTap(msg: string) {
   window.dispatchEvent(new CustomEvent(MICRO_EVENT, { detail: msg }));
 }
 
-// Fill {placeholders} in a template string from a vars map.
-export function tpl(s: string, vars: Record<string, string | number>) {
-  return s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
-}
-
 // ── Tap ─────────────────────────────────────────────────────
 // Makes any element react to a click/tap. `msg` may be a single
 // line or a list to cycle through. `copy` writes to the clipboard

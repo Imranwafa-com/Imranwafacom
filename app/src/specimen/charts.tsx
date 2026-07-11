@@ -5,13 +5,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { REDUCED, useReveal, useTween } from "./motion";
-import { emitTap, tpl } from "./microtaps";
+import { emitTap } from "./microtaps";
+import { tpl } from "./utils";
 import { COPY } from "./copy";
-
-// useInView — delegates to the robust scroll-based reveal hook
-function useInView<T extends HTMLElement = HTMLElement>(threshold = 0.2) {
-  return useReveal<T>(threshold);
-}
 
 // useCount — animated number tween (easeOutCubic)
 function useCount(target: number, duration = 1200, start = false): number {
@@ -119,13 +115,15 @@ interface BarRowProps {
   animate?: boolean;
 }
 export function BarRow({ label, value, max, suffix = "", barColor = "var(--accent)", onClick, active, animate = true }: BarRowProps) {
-  const [ref, seen] = useInView<HTMLDivElement>(0.15);
+  const [ref, seen] = useReveal<HTMLDivElement>(0.15);
   const tw = useTween(seen, 0, 700);
-  const pct = Math.round((value / max) * 100);
+  const pct = Math.round((value / (max || 1)) * 100);
   const w = animate ? pct * tw : pct;
   const handle = onClick || (() => emitTap(`${label}: ${value}${suffix}`));
   return (
-    <div ref={ref} className={"bar-row bar-clickable" + (active ? " bar-active" : "")} onClick={handle}>
+    <div ref={ref} className={"bar-row bar-clickable" + (active ? " bar-active" : "")} onClick={handle}
+      role="button" tabIndex={0} aria-label={`${label}: ${value}${suffix}`}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handle(); } }}>
       <div className="bar-label">{label}</div>
       <div className="bar-track">
         <div className="bar-fill" style={{ width: `${w}%`, background: active ? "var(--accent)" : barColor }} />
@@ -152,9 +150,11 @@ export function Donut({ data, size = 110, thickness = 14, onSliceHover }: DonutP
           <circle r={r} fill="none" stroke="var(--rule)" strokeWidth={thickness} />
           {data.map((d, i) => {
             const len = (d.value / total) * c;
-            const dasharray = `${len} ${c - len}`;
+            /* 2px gap between slices so adjacent segments read as distinct */
+            const dasharray = `${Math.max(0, len - 2)} ${c - len + 2}`;
             const isHover = hover === i;
             const expanded = thickness + 5;
+            const announce = () => emitTap(tpl(COPY.viz.donut, { label: d.label, value: d.value }));
             const el = (
               <circle
                 key={i}
@@ -165,9 +165,15 @@ export function Donut({ data, size = 110, thickness = 14, onSliceHover }: DonutP
                 strokeDasharray={dasharray}
                 strokeDashoffset={-offset}
                 style={{ transition: "stroke-width 200ms", cursor: "pointer" }}
+                tabIndex={0}
+                role="button"
+                aria-label={`${d.label}: ${d.value}%`}
+                onFocus={() => { setHover(i); onSliceHover?.(i); }}
+                onBlur={() => { setHover(null); onSliceHover?.(null); }}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); announce(); } }}
                 onMouseEnter={() => { setHover(i); onSliceHover?.(i); }}
                 onMouseLeave={() => { setHover(null); onSliceHover?.(null); }}
-                onClick={() => emitTap(tpl(COPY.viz.donut, { label: d.label, value: d.value }))}
+                onClick={announce}
               />
             );
             offset += len;
@@ -211,6 +217,15 @@ interface HeatCell { w: number; d: number; level: number; commits: number; date:
 export function Heatmap({ weeks = 26, seed = 42 }: { weeks?: number; seed?: number }) {
   const [hover, setHover] = useState<number | null>(null);
   const [pinned, setPinned] = useState<number | null>(null);
+
+  // Escape releases a pinned tooltip — clicking the exact same cell shouldn't
+  // be the only way out.
+  useEffect(() => {
+    if (pinned === null) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setPinned(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [pinned]);
 
   const cells = useMemo<HeatCell[]>(() => {
     let s = seed;
@@ -291,7 +306,7 @@ interface StatProps {
   digits?: number;
 }
 export function Stat({ label, value, unit, delta, trend, digits = 0 }: StatProps) {
-  const [ref, seen] = useInView<HTMLDivElement>(0.2);
+  const [ref, seen] = useReveal<HTMLDivElement>(0.2);
   const target = typeof value === "number" ? value : parseFloat(value) || 0;
   const animated = useCount(target, 1400, seen);
   const display = typeof value === "string" && isNaN(parseFloat(value)) ? value : fmtNum(animated, digits);
@@ -324,7 +339,7 @@ export function Stat({ label, value, unit, delta, trend, digits = 0 }: StatProps
 interface LineSeries { label: string; color?: string; data: { x: number; y: number }[] }
 interface LineChartProps { series: LineSeries[]; w?: number; h?: number; padding?: number; yMax?: number }
 export function LineChart({ series, w = 600, h = 200, padding = 32, yMax }: LineChartProps) {
-  const [ref, seen] = useInView<HTMLDivElement>(0.2);
+  const [ref, seen] = useReveal<HTMLDivElement>(0.2);
   const draw = useTween(seen, 150, 1400);
   const [hover, setHover] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -395,7 +410,7 @@ export function LineChart({ series, w = 600, h = 200, padding = 32, yMax }: Line
         })}
       </svg>
       {hover !== null && (
-        <div className="chart-tooltip" style={{ left: `${(sx(hover) / w) * 100}%` }}>
+        <div className="chart-tooltip" style={{ left: `clamp(56px, ${(sx(hover) / w) * 100}%, calc(100% - 56px))` }}>
           <div className="tt-title">{hover}</div>
           {series.map((s, i) => {
             const pt = s.data.find((p) => p.x === hover);
@@ -443,7 +458,7 @@ export function TagCloud({ tags, onSelect, selected }: TagCloudProps) {
 // ── RadarChart — capability profile (animated polygon draw) ─
 interface RadarDatum { axis: string; value: number }
 export function RadarChart({ data, size = 230, levels = 4 }: { data: RadarDatum[]; size?: number; levels?: number }) {
-  const [ref, seen] = useInView<HTMLDivElement>(0.2);
+  const [ref, seen] = useReveal<HTMLDivElement>(0.2);
   const t = useTween(seen, 150, 1100);
   const [hover, setHover] = useState<number | null>(null);
   const cx = size / 2, cy = size / 2, R = size / 2 - 38;
@@ -471,7 +486,12 @@ export function RadarChart({ data, size = 230, levels = 4 }: { data: RadarDatum[
         <polygon className="radar-area" points={areaPts} style={{ opacity: t }} />
         {data.map((d, i) => {
           const [px, py] = pt(i, R * d.value * t);
-          return <circle key={i} className={"radar-vertex" + (hover === i ? " on" : "")} cx={px} cy={py} r={hover === i ? 5 : 3} style={{ cursor: "pointer" }} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onClick={() => emitTap(tpl(COPY.viz.radar, { axis: d.axis, value: Math.round(d.value * 100) }))} />;
+          const announce = () => emitTap(tpl(COPY.viz.radar, { axis: d.axis, value: Math.round(d.value * 100) }));
+          return <circle key={i} className={"radar-vertex" + (hover === i ? " on" : "")} cx={px} cy={py} r={hover === i ? 5 : 3} style={{ cursor: "pointer" }}
+            tabIndex={0} role="button" aria-label={`${d.axis}: ${Math.round(d.value * 100)}`}
+            onFocus={() => setHover(i)} onBlur={() => setHover(null)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); announce(); } }}
+            onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onClick={announce} />;
         })}
         {hover !== null && (() => {
           const [px, py] = pt(hover, R * data[hover].value * t);
@@ -487,11 +507,11 @@ interface BubbleDatum { label: string; x: number; y: number; r: number }
 export function BubbleChart({ data, w = 560, h = 300, padding = 46, xLabel = "LINES OF CODE", yLabel = "FILES" }: {
   data: BubbleDatum[]; w?: number; h?: number; padding?: number; xLabel?: string; yLabel?: string;
 }) {
-  const [ref, seen] = useInView<HTMLDivElement>(0.2);
+  const [ref, seen] = useReveal<HTMLDivElement>(0.2);
   const t = useTween(seen, 150, 1100);
   const [hover, setHover] = useState<number | null>(null);
-  const xMax = Math.max(...data.map((d) => d.x)) * 1.12;
-  const yMax = Math.max(...data.map((d) => d.y)) * 1.2;
+  const xMax = Math.max(1, ...data.map((d) => d.x)) * 1.12;
+  const yMax = Math.max(1, ...data.map((d) => d.y)) * 1.2;
   const rMax = Math.max(...data.map((d) => d.r));
   const sx = (x: number) => padding + (x / (xMax || 1)) * (w - padding * 1.4);
   const sy = (y: number) => h - padding - (y / (yMax || 1)) * (h - padding * 1.7);
@@ -537,7 +557,7 @@ export function BubbleChart({ data, w = 560, h = 300, padding = 46, xLabel = "LI
 export function RadialGauge({ label, value, unit = "%", digits = 0, size = 124 }: {
   label: string; value: number; unit?: string; digits?: number; size?: number;
 }) {
-  const [ref, seen] = useInView<HTMLDivElement>(0.3);
+  const [ref, seen] = useReveal<HTMLDivElement>(0.3);
   const t = useTween(seen, 120, 1200);
   const n = useCount(value, 1300, seen);
   const r = (size - 18) / 2;
@@ -568,7 +588,7 @@ export function RadialGauge({ label, value, unit = "%", digits = 0, size = 124 }
 // ── WaffleChart — proportional 10×10 grid (sweep-fill) ──────
 interface WaffleDatum { label: string; value: number; color: string }
 export function WaffleChart({ data }: { data: WaffleDatum[] }) {
-  const [ref, seen] = useInView<HTMLDivElement>(0.25);
+  const [ref, seen] = useReveal<HTMLDivElement>(0.25);
   const t = useTween(seen, 100, 1300);
   const [hover, setHover] = useState<string | null>(null);
   const cells: { color: string; label: string }[] = [];
@@ -580,7 +600,7 @@ export function WaffleChart({ data }: { data: WaffleDatum[] }) {
       <div className="waffle-grid">
         {cells.map((c, i) => {
           const reveal = Math.max(0, Math.min(1, (t * 130 - i) / 10));
-          const dim = hover && c.label !== hover ? 0.22 : 1;
+          const dim = hover && c.label && c.label !== hover ? 0.22 : 1; // never dim empty filler cells — the grid must stay legible
           return (
             <span
               key={i}
