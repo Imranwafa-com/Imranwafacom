@@ -215,7 +215,6 @@ const COMMANDS: Command[] = [
   { cmd: "/secret", action: "secret", desc: CFG.commandPalette.commandDescriptions.secret },
   { cmd: "/theme", action: "theme", desc: "flip the lights (paper ⇄ carbon)" },
   { cmd: "/inspect", action: "inspect", desc: "examine the page under a blueprint loupe" },
-  { cmd: "/debug", action: "debug", desc: "toggle the dev debug overlay" },
   { cmd: "/clear", action: "close", desc: CFG.commandPalette.commandDescriptions.clear },
   { cmd: "/switch", action: "switch", desc: "switch the hero verb (build → fix → ship …)" },
 ];
@@ -230,11 +229,17 @@ function fmtTime(s: number): string {
 export function CommandPalette({ openTldr }: { openTldr: () => void }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [sel, setSel] = useState(0);
   const [view, setView] = useState<"list" | "stats" | "secret" | "txt">("list");
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const prevFocus = useRef<HTMLElement | null>(null);
   const navigate = useNavigate();
 
-  const close = useCallback(() => { setOpen(false); setQuery(""); setView("list"); }, []);
+  const close = useCallback(() => {
+    setOpen(false); setQuery(""); setView("list");
+    prevFocus.current?.focus?.(); // return focus to where the user was
+    prevFocus.current = null;
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -249,9 +254,6 @@ export function CommandPalette({ openTldr }: { openTldr: () => void }) {
         e.preventDefault();
         setOpen(true);
         setQuery(e.key === "/" ? "/" : e.key === ":" ? ":" : "");
-      } else if (/^[a-zA-Z]$/.test(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        setOpen(true);
-        setQuery(e.key);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -259,10 +261,22 @@ export function CommandPalette({ openTldr }: { openTldr: () => void }) {
   }, [open, close]);
 
   useEffect(() => {
-    if (open && inputRef.current) setTimeout(() => inputRef.current?.focus(), 0);
+    if (open && inputRef.current) {
+      prevFocus.current = document.activeElement as HTMLElement | null;
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
   }, [open]);
 
+  // Single-focusable modal: Tab stays on the input; arrows drive the list.
+  const trapTab = (e: React.KeyboardEvent) => {
+    if (e.key === "Tab") { e.preventDefault(); inputRef.current?.focus(); }
+  };
+
+  // Don't advertise mouse-only commands to touch users — a listed dead end is
+  // worse than an absent feature.
+  const canHover = typeof window !== "undefined" && window.matchMedia?.("(hover: hover) and (pointer: fine)").matches;
   const filtered = COMMANDS.filter((c) => {
+    if (c.action === "inspect" && !canHover) return false;
     if (!query) return true;
     const q = query.toLowerCase().replace(/^\//, "");
     return c.cmd.toLowerCase().includes(q);
@@ -286,11 +300,11 @@ export function CommandPalette({ openTldr }: { openTldr: () => void }) {
       window.location.href = "mailto:" + CFG.personal.email;
       close();
     } else if (c.action === "github") {
-      window.open(CFG.personal.github, "_blank");
+      window.open(CFG.personal.github, "_blank", "noopener,noreferrer");
       close();
     } else if (c.action === "linkedin") {
       const li = CFG.socialLinks.find((s) => s.platform === "LinkedIn");
-      if (li) window.open(li.url, "_blank");
+      if (li) window.open(li.url, "_blank", "noopener,noreferrer");
       close();
     } else if (c.action === "inspect") {
       // The loupe needs a fine pointer + hover; on touch it's a no-op, so say so.
@@ -320,6 +334,8 @@ export function CommandPalette({ openTldr }: { openTldr: () => void }) {
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") { e.preventDefault(); close(); return; }
+    if (e.key === "ArrowDown") { e.preventDefault(); setSel((s) => Math.min(s + 1, filtered.length - 1)); return; }
+    if (e.key === "ArrowUp") { e.preventDefault(); setSel((s) => Math.max(s - 1, 0)); return; }
     if (e.key === "Enter") {
       e.preventDefault();
       // :switch: / switch / /switch all advance the hero verb (keep palette open).
@@ -328,7 +344,7 @@ export function CommandPalette({ openTldr }: { openTldr: () => void }) {
       // Hidden keyword easter eggs: type the bare word (e.g. "color", "dance") + Enter.
       const egg = query.toLowerCase().replace(/^\//, "").trim();
       if (KEYWORD_EGGS[egg]) { KEYWORD_EGGS[egg](); close(); return; }
-      const match = COMMANDS.find((c) => c.cmd === query.toLowerCase()) || filtered[0];
+      const match = COMMANDS.find((c) => c.cmd === query.toLowerCase()) || filtered[sel] || filtered[0];
       if (match) run(match);
     }
   };
@@ -337,12 +353,12 @@ export function CommandPalette({ openTldr }: { openTldr: () => void }) {
   return (
     <>
       <div className="palette-back" onClick={close} />
-      <div className="palette" role="dialog" aria-label="Command palette">
+      <div className="palette" role="dialog" aria-modal="true" aria-label="Command palette" onKeyDown={trapTab}>
         {view === "list" && (
           <>
             <div className="palette-input-row">
               <span className="palette-prompt">›</span>
-              <input ref={inputRef} value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={onKeyDown} placeholder={CFG.commandPalette.placeholder} />
+              <input ref={inputRef} value={query} onChange={(e) => { setQuery(e.target.value); setSel(0); }} onKeyDown={onKeyDown} placeholder={CFG.commandPalette.placeholder} />
               <kbd>esc</kbd>
             </div>
             <div className="palette-body">
@@ -350,8 +366,9 @@ export function CommandPalette({ openTldr }: { openTldr: () => void }) {
                 <div className="palette-feedback">no command matches "{query}".</div>
               ) : (
                 <div className="palette-list">
-                  {filtered.map((c) => (
-                    <button key={c.cmd} onClick={() => run(c)}>
+                  {filtered.map((c, i) => (
+                    <button key={c.cmd} onClick={() => run(c)} aria-selected={i === sel}
+                      style={i === sel ? { background: "var(--accent-soft)" } : undefined}>
                       <code>{c.cmd}</code>
                       <span>{c.desc}</span>
                     </button>
@@ -472,8 +489,18 @@ export function TldrModal({ open, onClose }: { open: boolean; onClose: () => voi
   return (
     <>
       <div className="palette-back" onClick={onClose} />
-      <div className="tldr-modal" style={{ position: "fixed" }}>
-        <button className="tldr-x" onClick={onClose} aria-label="close">×</button>
+      <div className="tldr-modal" style={{ position: "fixed" }} role="dialog" aria-modal="true" aria-label="Site summary"
+        onKeyDown={(e) => {
+          if (e.key !== "Tab") return;
+          // Two focusables (close ×, back button) — cycle between them.
+          const root = e.currentTarget;
+          const f = root.querySelectorAll<HTMLElement>("button");
+          if (!f.length) return;
+          const first = f[0], last = f[f.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }}>
+        <button className="tldr-x" onClick={onClose} aria-label="close" autoFocus>×</button>
         <div className="label" style={{ color: "var(--accent)" }}>※ {t.title}</div>
         <h3>here's the whole site<br />in <em>30 seconds</em></h3>
         <div className="tldr-sub">{t.summaryText}</div>
@@ -498,7 +525,7 @@ export function SourceEgg() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && (e.key === "u" || e.key === "i" || e.key === "U" || e.key === "I")) {
-        e.preventDefault();
+        // no preventDefault — the egg shows, but native view-source/dev tools proceed
         setShow(true);
         setTimeout(() => setShow(false), 6000);
       }

@@ -456,7 +456,7 @@ export function TypeOnView({
   // Fade-in mode (re-entries after first type)
   if (mode === "__fadeIn" || hasTypedRef.current) {
     return createElement(
-      Tag, { ref, className, style: { opacity: 1 } as CSSProperties },
+      Tag, { ref, "aria-label": full, className, style: { opacity: 1 } as CSSProperties },
       segs.map((s, i) => (s.br ? <br key={i} /> : <span key={i} className={s.className || undefined}>{s.text}</span>)),
     );
   }
@@ -471,7 +471,7 @@ export function TypeOnView({
       remaining -= take;
       return <span key={i} className={s.className || undefined}>{txt.slice(0, take)}</span>;
     });
-    return createElement(Tag, { ref, className: className + (showCaret ? " typing" : "") }, nodes, caret);
+    return createElement(Tag, { ref, "aria-label": full, className: className + (showCaret ? " typing" : "") }, nodes, caret);
   }
 
   if (mode === "wordFade") {
@@ -491,7 +491,7 @@ export function TypeOnView({
         </span>
       );
     });
-    return createElement(Tag, { ref, className }, nodes, caret);
+    return createElement(Tag, { ref, "aria-label": full, className }, nodes, caret);
   }
 
   if (mode === "scramble") {
@@ -510,7 +510,7 @@ export function TypeOnView({
         </span>
       );
     });
-    return createElement(Tag, { ref, className }, nodes);
+    return createElement(Tag, { ref, "aria-label": full, className }, nodes);
   }
 
   if (mode === "cascade") {
@@ -534,7 +534,7 @@ export function TypeOnView({
         </span>
       );
     });
-    return createElement(Tag, { ref, className }, nodes);
+    return createElement(Tag, { ref, "aria-label": full, className }, nodes);
   }
 
   if (mode === "slideLines") {
@@ -547,10 +547,10 @@ export function TypeOnView({
         <span key={si} className={s.className || undefined} style={{ display: "inline-block", whiteSpace: "pre-wrap", opacity: e, transform: `translateY(${(1 - e) * 20}px)` }}>{s.text}</span>
       );
     });
-    return createElement(Tag, { ref, className }, nodes, caret);
+    return createElement(Tag, { ref, "aria-label": full, className }, nodes, caret);
   }
 
-  return createElement(Tag, { ref, className }, full);
+  return createElement(Tag, { ref, "aria-label": full, className }, full);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -661,44 +661,56 @@ interface SectionFxProps {
 }
 export function SectionFx({ children, variant = "up", className = "", as = "section", style, intensity = 1 }: SectionFxProps) {
   const ref = useRef<HTMLElement | null>(null);
-  const [p, setP] = useState(REDUCED ? 1 : 0);
-  const peakRef = useRef(REDUCED ? 1 : 0);
   useEffect(() => {
     const el = ref.current;
-    if (!el || REDUCED) { setP(1); return; }
+    if (!el) return;
+    if (REDUCED) { el.style.opacity = "1"; return; }
     let raf = 0;
+    let top = 0; // document offset — measured off the scroll path (mount/resize only)
+    let peak = 0;
+    const ease = (x: number) => 1 - Math.pow(1 - x, 3);
+    const apply = (prog: number) => {
+      const e = ease(prog);
+      const inv = 1 - e;
+      let transform = "none";
+      if (variant === "zoomOut") transform = `scale(${1 + 0.06 * intensity * inv})`;
+      else if (variant === "zoomIn") transform = `scale(${1 - 0.07 * intensity * inv})`;
+      else if (variant === "left") transform = `translate3d(${56 * intensity * inv}px,0,0)`;
+      else transform = `translate3d(0,${52 * intensity * inv}px,0)`;
+      el.style.transform = transform;
+      el.style.opacity = String(0.4 + 0.6 * e);
+    };
+    const detach = () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
     const compute = () => {
       raf = 0;
-      const r = el.getBoundingClientRect();
       const vh = window.innerHeight || 1;
       const startAt = vh * 0.95;
       const endAt = vh * 0.38;
-      let prog = (startAt - r.top) / (startAt - endAt);
+      let prog = (startAt - (top - window.scrollY)) / (startAt - endAt);
       prog = Math.max(0, Math.min(1, prog));
-      if (prog > peakRef.current) { peakRef.current = prog; setP(prog); }
+      if (prog > peak) { peak = prog; apply(prog); }
+      if (peak >= 1) detach(); // entrance done — stop listening entirely
     };
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(compute); };
+    const measure = () => { top = el.getBoundingClientRect().top + window.scrollY; };
+    const onResize = () => { measure(); onScroll(); };
+    measure();
+    apply(0);
     compute();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, []);
+    window.addEventListener("resize", onResize);
+    return () => { detach(); if (raf) cancelAnimationFrame(raf); };
+  }, [variant, intensity]);
 
-  const ease = (x: number) => 1 - Math.pow(1 - x, 3);
-  const e = ease(p);
-  const inv = 1 - e;
-  let transform = "none";
-  let origin = "center center";
-  if (variant === "zoomOut") { transform = `scale(${1 + 0.06 * intensity * inv})`; origin = "center top"; }
-  else if (variant === "zoomIn") { transform = `scale(${1 - 0.07 * intensity * inv})`; }
-  else if (variant === "left") { transform = `translate3d(${56 * intensity * inv}px,0,0)`; }
-  else if (variant === "up") { transform = `translate3d(0,${52 * intensity * inv}px,0)`; }
-
-  const st: CSSProperties = { transform, transformOrigin: origin, opacity: 0.4 + 0.6 * e, willChange: "transform, opacity", ...style };
+  const st: CSSProperties = {
+    transformOrigin: variant === "zoomOut" ? "center top" : "center center",
+    opacity: REDUCED ? 1 : 0.4,
+    willChange: "transform, opacity",
+    ...style,
+  };
   return createElement(as, { ref, className, style: st }, children);
 }
 
@@ -825,7 +837,7 @@ export function StartupIntro() {
     const fontsP = (typeof document !== "undefined" && document.fonts)
       ? document.fonts.ready : Promise.resolve();
     fontsP.then(markReady).catch(markReady);
-    const safety = setTimeout(markReady, 5000);
+    const safety = setTimeout(markReady, 1800); // fonts are self-hosted+preloaded; never hold the page hostage
 
     const minDur = 500;
     const t0 = Date.now();

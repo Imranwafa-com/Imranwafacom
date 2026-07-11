@@ -39,3 +39,8 @@ pnpm-debug.log*
 .cache
 Thumbs.db
 change.md
+
+# one-shot AI audit/roast reports
+critic.md
+EFFICIENCY.md
+roast.md

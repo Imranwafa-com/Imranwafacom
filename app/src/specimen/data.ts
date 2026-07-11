@@ -69,7 +69,7 @@ export const PROJECTS: Project[] = [
   {
     n: "06", title: "CLI Toolkit",
     desc: "CLI tools to stop doing the same setup steps by hand every time.",
-    long: "Scaffolding, code generation, the boring stuff. Less flashy than the other projects but I actually use these.",
+    long: "Scaffolding, code generation, the boring stuff. Used daily.",
     tags: ["Node.js", "CLI", "TypeScript"],
     year: "2023", status: "active", type: "Tools",
     link: "https://github.com/imranhwafa",

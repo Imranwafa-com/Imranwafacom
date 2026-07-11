@@ -43,7 +43,7 @@
   --paper-2: oklch(0.955 0.003 250);
   --ink: oklch(0.16 0.012 264);
   --ink-2: oklch(0.34 0.012 264);
-  --ink-3: oklch(0.58 0.012 264);
+  --ink-3: oklch(0.52 0.012 264); /* ≥4.5:1 on --paper for 11px mono labels */
   --rule: oklch(0.16 0.012 264 / 0.16);
   --rule-strong: oklch(0.16 0.012 264 / 0.42);
   --accent: oklch(0.50 0.23 264);
@@ -76,7 +76,7 @@
   --paper-2: oklch(0.205 0.014 264);
   --ink: oklch(0.93 0.006 264);
   --ink-2: oklch(0.76 0.008 264);
-  --ink-3: oklch(0.56 0.010 264);
+  --ink-3: oklch(0.65 0.010 264); /* ≥4.5:1 on --paper for 11px mono labels */
   --rule: oklch(0.93 0.006 264 / 0.14);
   --rule-strong: oklch(0.93 0.006 264 / 0.40);
   --accent: oklch(0.70 0.19 264);
@@ -379,7 +379,7 @@ body::before {
 .tagline em { color: var(--accent); font-style: italic; text-shadow: 0 0 16px var(--accent-soft); }
 .tagline .tag-em { color: var(--accent); font-style: italic; text-shadow: 0 0 16px var(--accent-soft); }
 
-.dosier {
+.dossier {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -387,14 +387,14 @@ body::before {
   font-size: 11px;
   letter-spacing: 0.06em;
 }
-.dosier .row {
+.dossier .row {
   display: flex;
   justify-content: space-between;
   border-bottom: 1px dotted var(--rule);
   padding: 4px 0;
 }
-.dosier .row span:first-child { color: var(--ink-3); text-transform: uppercase; }
-.dosier .row span:last-child { color: var(--ink); }
+.dossier .row span:first-child { color: var(--ink-3); text-transform: uppercase; }
+.dossier .row span:last-child { color: var(--ink); }
 
 /* ───── Section header ─────────────────────────────────────── */
 .section {
@@ -478,7 +478,8 @@ body::before {
   font-family: var(--mono);
   font-size: 12px;
   color: var(--accent);
-  opacity: 0;
+  /* always faintly visible — rows must read as clickable on touch too */
+  opacity: 0.35;
   transform: translateX(-6px);
   transition: opacity 160ms, transform 160ms;
 }
@@ -707,8 +708,8 @@ body::before {
   transition: padding-left 200ms, background 200ms;
 }
 .contact-row:last-child { border-bottom: 1px solid var(--rule); }
-.contact-row:hover { padding-left: 16px; background: var(--paper-2); }
-.contact-row:hover .arrow-big { transform: translateX(8px) rotate(15deg) scale(1.1); color: var(--accent); text-shadow: 0 0 12px var(--accent-soft); }
+.contact-row:hover, .contact-row:focus-visible { padding-left: 16px; background: var(--paper-2); }
+.contact-row:hover .arrow-big, .contact-row:focus-visible .arrow-big { transform: translateX(8px) rotate(15deg) scale(1.1); color: var(--accent); text-shadow: 0 0 12px var(--accent-soft); }
 
 .contact-row .num {
   font-family: var(--mono);
@@ -854,7 +855,7 @@ a.inline:hover {
   pointer-events: none;
   z-index: 4;
   min-width: 100px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-2); /* theme-adaptive — hardcoded rgba vanished on carbon */
 }
 .tt-title {
   font-family: var(--serif);
@@ -914,7 +915,7 @@ a.inline:hover {
   font-style: normal;
   padding: 2px 8px;
   border-radius: 1px;
-  border: none;
+  border-bottom: 1px dotted transparent; /* keep the 1px so height never jumps */
 }
 .tag.tag-dim { opacity: 0.32; }
 .tag { cursor: pointer; transition: opacity 150ms, color 150ms; }
@@ -1064,7 +1065,8 @@ a.inline:hover {
   letter-spacing: 0.04em;
   color: var(--ink-2);
   border-bottom: 1px dotted var(--rule);
-  padding: 2px 4px 2px 0;
+  /* metrics match .tag-sel exactly so selecting never reflows the cloud */
+  padding: 2px 8px;
 }
 .tag.tag-w1 { font-size: 11px; opacity: 0.6; }
 .tag.tag-w2 { font-size: 12px; opacity: 0.75; }
@@ -1277,8 +1279,9 @@ a.inline:hover {
   animation: toastIn 0.5s ease-out;
 }
 @keyframes toastIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  /* `translate` (not transform) so centered toasts keep their translateX(-50%) */
+  from { opacity: 0; translate: 0 -8px; }
+  to { opacity: 1; translate: 0 0; }
 }
 .toast-speed { bottom: 80px; left: 50%; transform: translateX(-50%); border-color: var(--accent); color: var(--accent); }
 .toast-bottom { top: 80px; left: 50%; transform: translateX(-50%); }
@@ -1808,9 +1811,7 @@ a.inline:hover {
    QUIRKS + HQ POLISH
    ════════════════════════════════════════════════════════════ */
 
-/* selection + scrollbar — single source of truth; the thumb reads as a
-   floating pill (transparent inset border) and adopts the accent on hover.
-   Applies to every scroll container (the page + any inner overflow area). */
+/* selection + scrollbar */
 ::selection { background: var(--accent); color: var(--paper); }
 * { scrollbar-width: thin; scrollbar-color: var(--rule-strong) transparent; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
@@ -1823,16 +1824,16 @@ a.inline:hover {
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); background-clip: padding-box; }
 
-/* smooth theme switches */
-body, .panel, .masthead, .index-table tr, .palette, .tldr-modal {
+/* smooth theme switches (.panel owns its own merged transition below) */
+body, .masthead, .index-table tr, .palette, .tldr-modal {
   transition: background-color 0.45s ease, border-color 0.45s ease, color 0.45s ease;
 }
 
-/* keyboard focus */
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+/* keyboard focus — outline only; it follows the element's own radius */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* panel hover lift */
-.panel { transition: background-color 0.45s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.22,0.61,0.36,1), box-shadow 0.3s ease; }
+/* panel hover lift + theme-switch fades, merged in ONE rule */
+.panel { transition: background-color 0.45s ease, color 0.45s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.22,0.61,0.36,1), box-shadow 0.3s ease; }
 .panel:hover {
   border-color: var(--rule-strong);
   transform: translateY(-3px);
@@ -1843,7 +1844,7 @@ body, .panel, .masthead, .index-table tr, .palette, .tldr-modal {
 .index-table tbody tr:not(.idx-detail):hover { box-shadow: inset 2px 0 0 var(--accent); }
 
 /* contact row accent inset */
-.contact-row:hover { box-shadow: inset 2px 0 0 var(--accent); }
+.contact-row:hover, .contact-row:focus-visible { box-shadow: inset 2px 0 0 var(--accent); }
 
 /* section-title hover hint */
 .sec-hint {
@@ -1910,10 +1911,8 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   outline-offset: 2px;
 }
 
-/* panels: lift + accent edge on hover, smooth tilt */
-.panel {
-  transition: transform 300ms cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 300ms, border-color 300ms;
-}
+/* panels: lift + accent edge on hover (transition lives on the merged .panel
+   rule above — keep it in ONE place) */
 .panel:hover {
   border-color: var(--rule-strong);
   box-shadow: 0 18px 50px -18px oklch(from var(--accent) l c h / 0.25), 0 2px 0 0 var(--accent) inset;
@@ -2049,7 +2048,9 @@ html.overdrive .wordmark .it,
 html.overdrive .sec-title .it { text-shadow: 0 0 24px oklch(from var(--accent) l c h / 0.55); }
 
 /* smoother theme switches */
-body, .panel, .masthead, .index-table tr, .contact-row, .palette {
+body, .masthead, .index-table tr, .contact-row, .palette {
+  /* .panel handles its own transitions above — listing it here would clobber
+     its transform/box-shadow hover lift */
   transition-property: background-color, border-color, color;
   transition-duration: 400ms;
 }
@@ -2075,7 +2076,7 @@ body, .panel, .masthead, .index-table tr, .contact-row, .palette {
   .contact-row { grid-template-columns: 50px 1fr auto; }
   .contact-row .name { font-size: 26px; }
   .index-table { font-size: 12px; }
-  .idx-title { font-size: 20px; white-space: normal; }
+  .idx-title { font-size: 20px; white-space: normal; width: auto; } /* desc/tags hidden — release the 30% column */
   .idx-desc, .idx-tags { display: none; }
   .idx-detail-inner { grid-template-columns: 1fr; }
   .colophon { grid-template-columns: 1fr; text-align: left; }
@@ -2117,7 +2118,7 @@ body, .panel, .masthead, .index-table tr, .contact-row, .palette {
   .wordmark .small { font-size: 10px; letter-spacing: 0.18em; margin-top: 16px; }
   .hero-foot { margin-top: 28px; padding-top: 18px; gap: 20px; }
   .tagline { font-size: 18px; max-width: none; }
-  .dosier { font-size: 10px; }
+  .dossier { font-size: 10px; }
   .regmark { width: 16px; height: 16px; }
 
   /* KPI strips → 2-up with internal borders */
@@ -2152,7 +2153,7 @@ body, .panel, .masthead, .index-table tr, .contact-row, .palette {
   .scroller-track { gap: 28px; font-size: 10px; }
 
   /* Dashboard panels */
-  .dash-grid, .dash-grid-3 { grid-template-columns: 1fr; gap: 18px; margin-bottom: 24px; }
+  .dash-grid, .dash-grid-3 { gap: 18px; margin-bottom: 24px; } /* columns already 1fr from 900px */
   .panel { padding: 18px 16px 14px; }
   .panel-head { flex-wrap: wrap; gap: 4px; }
   .panel-title { font-size: 19px; }
@@ -2165,7 +2166,7 @@ body, .panel, .masthead, .index-table tr, .contact-row, .palette {
   .idx-head th:nth-child(3),       /* description */
   .idx-head th:nth-child(4),       /* LoC */
   .idx-head th:nth-child(5) { display: none; }   /* commits */
-  .idx-desc, .idx-met:not(.idx-met-r) { display: none; }
+  .idx-met:not(.idx-met-r) { display: none; } /* .idx-desc already hidden from 900px */
   .index-table td { padding: 14px 6px; }
   .idx-title { font-size: 19px; white-space: normal; }
   .idx-num { width: 34px; }
@@ -2553,7 +2554,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
   /* Comfortable touch targets for the editorial taps that remain
      visible on phones (dossier rows, colophon lines, skills, timeline). */
-  .dosier .tap { padding: 4px 0; }
+  .dossier .tap { padding: 4px 0; }
   .colophon .tap { padding: 3px 0; }
   .skills .items.tap { padding: 4px 0; }
 
@@ -2756,8 +2757,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   margin-bottom: 14px;
 }
 
-/* ── Resume loader + route skeleton (shared by the lazy chunk's Suspense
-      fallback and the PDF-load state) — a sheet developing under a scan line ── */
+/* ── Resume loader + route skeleton (Suspense fallback + PDF-load state) ── */
 .route-skeleton {
   position: fixed;
   inset: 0;
@@ -2846,4 +2846,14 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .resume-loader-scan, .resume-loader-line, .resume-loader-dots::after { animation: none; }
   .resume-loader-line { opacity: 0.6; }
   .resume-loader-scan { opacity: 0.3; }
+}
+
+/* ── Print — the page doubles as a résumé; ship ink, not chrome ── */
+@media print {
+  .bg-canvas, .crosshair, .scroll-progress, .theme-toggle, .loupe-toggle, .loupe-canvas,
+  .micro-toast, .toast, .quirk-toast, .click-msg, .idle-msg, .idle-screen, .idle-vignette,
+  .palette, .palette-back, .tldr-modal, .tldr-back, .debug-hud { display: none !important; }
+  body { background: #fff !important; }
+  /* force ink on EVERY element — carbon-theme token colors would print pale grey */
+  * { color: #000 !important; box-shadow: none !important; text-shadow: none !important; }
 }

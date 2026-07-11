@@ -27,9 +27,13 @@ import { currentVerb, SWITCH_EVENT } from "./switch-verb";
 import { currentTheme, toggleTheme, THEME_EVENT, type ThemeName } from "./theme";
 import { QuirksExtra } from "./quirks-extra";
 import { Tap, MicroToast, emitTap } from "./microtaps";
+import { tpl } from "./utils";
 import { fireRipple } from "./runtime";
-import { COPY } from "./copy";
-import type { MetaBlock as MetaBlockT, DosierRow as DosierRowT } from "./copy";
+import { COPY, type MetaBlock as MetaBlockT, type DossierRow as DossierRowT } from "./copy";
+import {
+  PROJECTS, TOTALS, LANG_DIST, STACK_USAGE, SHIP_TREND, TAG_WEIGHTS, SKILLS, CONTACTS,
+  EDUCATION, CERTS, EXPERIENCE, RADAR_SKILLS, GAUGES, TIME_ALLOC, type Project, type ResumeEntry,
+} from "./data";
 
 // ── Copy helpers ────────────────────────────────────────────
 // Render a Seg[] as inline spans (for non-typewriter split-italic titles).
@@ -49,7 +53,7 @@ function MetaBlocks({ blocks, className, speed }: { blocks: MetaBlockT[]; classN
   );
 }
 // A tappable dossier row (Currently / Stack / Status / …), driven by config.
-function DosierRow({ row }: { row: DosierRowT }) {
+function DossierRow({ row }: { row: DossierRowT }) {
   return (
     <Tap as="div" className="row" copy={row.copy} msg={row.taps}
       onTap={row.scrollTo ? () => { const el = document.getElementById(row.scrollTo!); if (el) window.scrollTo({ top: el.offsetTop - 60, behavior: "smooth" }); } : undefined}>
@@ -57,15 +61,6 @@ function DosierRow({ row }: { row: DosierRowT }) {
     </Tap>
   );
 }
-// Fill {placeholders} in a template string from a vars map.
-function tpl(s: string, vars: Record<string, string | number>) {
-  return s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
-}
-import {
-  PROJECTS, TOTALS, LANG_DIST, STACK_USAGE, SHIP_TREND, TAG_WEIGHTS, SKILLS, CONTACTS,
-  EDUCATION, CERTS, EXPERIENCE, RADAR_SKILLS, GAUGES, TIME_ALLOC, type Project, type ResumeEntry,
-} from "./data";
-
 // ── Helpers ─────────────────────────────────────────────────
 function useClock() {
   const [now, setNow] = useState(new Date());
@@ -252,13 +247,13 @@ function Hero() {
           />
         </Parallax>
         <Parallax as="div" speed={0.03}>
-          <Reveal className="dosier" delay={1800}>
-            {COPY.hero.dosierLeft.map((r) => <DosierRow key={r.k} row={r} />)}
+          <Reveal className="dossier" delay={1800}>
+            {COPY.hero.dossierLeft.map((r) => <DossierRow key={r.k} row={r} />)}
           </Reveal>
         </Parallax>
         <Parallax as="div" speed={0.03}>
-          <Reveal className="dosier" delay={1950}>
-            {COPY.hero.dosierRight.map((r) => <DosierRow key={r.k} row={r} />)}
+          <Reveal className="dossier" delay={1950}>
+            {COPY.hero.dossierRight.map((r) => <DossierRow key={r.k} row={r} />)}
             <Tap as="div" className="row" ripple={false} onTap={() => {
               coffee.current++;
               const n = coffee.current;
@@ -769,7 +764,9 @@ function Contact() {
           <div className="contact-list">
             <Stagger step={90}>
               {CONTACTS.map((c) => (
-                <a key={c.num} className="contact-row" href={c.href} target="_blank" rel="noreferrer">
+                <a key={c.num} className="contact-row" href={c.href}
+                  target={c.href.startsWith("http") ? "_blank" : undefined}
+                  rel={c.href.startsWith("http") ? "noreferrer" : undefined}>
                   <div className="num">{COPY.contact.numPrefix}{c.num}</div>
                   <div>
                     <div className="name serif">{c.name}</div>

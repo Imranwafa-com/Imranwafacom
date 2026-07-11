@@ -13,6 +13,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/TextLayer.css';
 import { InteractiveBG } from '../specimen/bg';
 import { ResumeLoader } from './ResumeLoader';
 import './resume.css';
@@ -87,8 +88,10 @@ export default function Resume() {
 
   const jump = (i: number) => { if (!leaving) { setHinted(true); setShowFooter(false); setActive(i); } };
 
-  // Wheel anywhere flips the deck.
+  // Wheel flips the deck — but only while nothing overflows. If the page is
+  // taller than the viewport (zoom, short windows), yield to native scroll.
   const onWheel = (e: React.WheelEvent) => {
+    if (document.documentElement.scrollHeight > window.innerHeight + 1) return;
     if (Math.abs(e.deltaY) < 18) return;
     go(e.deltaY > 0 ? 1 : -1);
   };
@@ -96,9 +99,12 @@ export default function Resume() {
   // Keyboard: arrows / space / page keys.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Never steal keys from focused controls — Space/Enter must activate
+      // buttons and links, not flip the deck.
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === 'BUTTON' || tag === 'A' || tag === 'INPUT' || tag === 'TEXTAREA') return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) { e.preventDefault(); go(1); }
       else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) { e.preventDefault(); go(-1); }
-      else if (e.key === 'Escape') home();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -192,7 +198,7 @@ export default function Resume() {
                 <Page
                   pageNumber={i + 1}
                   width={pageW}
-                  renderTextLayer={false}
+                  renderTextLayer={true}
                   renderAnnotationLayer={false}
                   loading=""
                 />
@@ -245,6 +251,7 @@ export default function Resume() {
             </p>
             <div className="resume-panel-actions">
               <a href="/resume.pdf" download className="resume-btn resume-btn-primary">Download resume</a>
+              <a href="mailto:contact@imranwafa.com" className="resume-btn resume-btn-ghost">Email me</a>
               <button type="button" onClick={home} className="resume-btn resume-btn-ghost">Back to home</button>
             </div>
           </motion.aside>
@@ -329,7 +336,7 @@ export default function Resume() {
         <div className="resume-footer-inner">
           <div className="rf-col">
             <div className="rf-big">Imran Wafa</div>
-            <a href="mailto:imran@imranwafa.com">imran@imranwafa.com</a>
+            <a href="mailto:contact@imranwafa.com">contact@imranwafa.com</a>
             <a href="https://github.com/imranhwafa" target="_blank" rel="noreferrer">github.com/imranhwafa</a>
           </div>
           <div className="rf-col">
