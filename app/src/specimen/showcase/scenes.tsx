@@ -266,7 +266,7 @@ export function Ambience({ pal }: { pal: Palette }) {
   const grid = useRef<THREE.GridHelper>(null);
   useEffect(() => {
     const m = grid.current?.material as THREE.Material | undefined;
-    if (m) { m.transparent = true; m.opacity = pal.dark ? 0.12 : 0.18; }
+    if (m) { m.transparent = true; m.opacity = pal.dark ? 0.12 : 0.18; m.needsUpdate = true; }
   }, [pal]);
   // fog matching the page background — hardware fades into the paper
   useEffect(() => {
