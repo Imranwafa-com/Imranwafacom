@@ -77,19 +77,26 @@ interface BoxProps {
   emissiveIntensity?: number;
   opacity?: number;
 }
+// Static box materials are shared via a module cache — dozens of
+// slabs otherwise allocate identical materials. Animated materials
+// (LEDs, lock) stay per-instance.
+const matCache = new Map<string, THREE.MeshStandardMaterial>();
+function boxMaterial(color: THREE.Color, metalness: number, roughness: number, emissive: THREE.Color, emissiveIntensity: number, opacity: number) {
+  const key = `${color.getHexString()}|${metalness}|${roughness}|${emissive.getHexString()}|${emissiveIntensity}|${opacity}`;
+  let m = matCache.get(key);
+  if (!m) {
+    m = new THREE.MeshStandardMaterial({
+      color, metalness, roughness, emissive, emissiveIntensity,
+      transparent: opacity < 1, opacity,
+    });
+    matCache.set(key, m);
+  }
+  return m;
+}
 function Box({ size, color, position, rotation, metalness = 0.6, roughness = 0.45, emissive, emissiveIntensity = 0, opacity = 1 }: BoxProps) {
+  const mat = boxMaterial(color, metalness, roughness, emissive ?? color, emissiveIntensity, opacity);
   return (
-    <mesh geometry={UNIT_BOX} dispose={null} scale={size} position={position} rotation={rotation}>
-      <meshStandardMaterial
-        color={color}
-        metalness={metalness}
-        roughness={roughness}
-        emissive={emissive ?? color}
-        emissiveIntensity={emissiveIntensity}
-        transparent={opacity < 1}
-        opacity={opacity}
-      />
-    </mesh>
+    <mesh geometry={UNIT_BOX} material={mat} dispose={null} scale={size} position={position} rotation={rotation} />
   );
 }
 
@@ -325,7 +332,10 @@ export function HomelabScene({ sRef, pal }: { sRef: React.RefObject<number>; pal
   const rails = useRef<THREE.Group>(null);
   useFrame(({ clock }) => {
     const s = sRef.current;
-    if (root.current) root.current.position.x = (0 - projOf(s)) * SPREAD;
+    if (!root.current) return;
+    const x = (0 - projOf(s)) * SPREAD;
+    root.current.position.x = x;
+    if (Math.abs(x) > 12) return; // fully offscreen — skip the choreography
     const l = localOf(s, 0);
     const slide = smooth(0.15, 0.95, l);
     const open = smooth(1.15, 1.95, l);
@@ -376,11 +386,15 @@ export function RackMotionScene({ sRef, pal }: { sRef: React.RefObject<number>; 
   const lockMat = useRef<THREE.MeshStandardMaterial>(null);
   const ringMat = useRef<THREE.MeshBasicMaterial>(null);
   const ring = useRef<THREE.Mesh>(null);
+  const ringT0 = useRef(-1);
   const redLight = useRef<THREE.PointLight>(null);
   const figMat = useMemo(() => new THREE.MeshBasicMaterial({ color: RED, wireframe: true, transparent: true, opacity: 0.85 }), []);
-  useFrame(({ clock }) => {
+  useFrame(({ clock }, delta) => {
     const s = sRef.current;
-    if (root.current) root.current.position.x = (1 - projOf(s)) * SPREAD;
+    if (!root.current) return;
+    const rx = (1 - projOf(s)) * SPREAD;
+    root.current.position.x = rx;
+    if (Math.abs(rx) > 12) return; // fully offscreen — skip the choreography
     const l = localOf(s, 1);
     const now = clock.elapsedTime;
     const enter = smooth(0.05, 0.85, l);
@@ -392,12 +406,13 @@ export function RackMotionScene({ sRef, pal }: { sRef: React.RefObject<number>; 
     }
     // walk cycle — legs and arms counter-swing while moving
     const amp = moving ? 0.55 : 0;
-    limbs.current.forEach((g, i) => {
-      if (!g) return;
+    for (let i = 0; i < limbs.current.length; i++) {
+      const g = limbs.current[i];
+      if (!g) continue;
       const phase = i % 2 === 0 ? 0 : Math.PI;
       const target = amp * Math.sin(now * 6.4 + phase) * (i < 2 ? 1 : 0.7);
-      g.rotation.x += (target - g.rotation.x) * 0.25;
-    });
+      g.rotation.x = THREE.MathUtils.damp(g.rotation.x, target, 16, delta);
+    }
     // stage 2: detection blink — outline + red light pulse together
     const blink = bell(l, 1, 0.55);
     const pulse = 0.5 + 0.5 * Math.sin(now * 7);
@@ -413,9 +428,12 @@ export function RackMotionScene({ sRef, pal }: { sRef: React.RefObject<number>; 
     if (shackle.current) shackle.current.position.y = 0.26 - 0.13 * shut;
     if (lockMat.current) lockMat.current.emissiveIntensity = 0.25 + shut * 1.6;
     if (ring.current && ringMat.current) {
-      const ringT = shut > 0.99 ? (now % 1.6) / 1.6 : 0;
+      // pulse phase starts when the lock shuts, not at a random clock point
+      if (shut > 0.99 && ringT0.current < 0) ringT0.current = now;
+      if (shut <= 0.99) ringT0.current = -1;
+      const ringT = ringT0.current >= 0 ? ((now - ringT0.current) % 1.6) / 1.6 : 0;
       ring.current.scale.setScalar(0.5 + ringT * 4);
-      ringMat.current.opacity = shut > 0.99 ? (1 - ringT) * 0.5 : 0;
+      ringMat.current.opacity = ringT0.current >= 0 ? (1 - ringT) * 0.5 : 0;
     }
   });
   return (
@@ -479,12 +497,16 @@ export function K8sScene({ sRef, pal }: { sRef: React.RefObject<number>; pal: Pa
   }, [finals]);
   useFrame(({ clock }) => {
     const s = sRef.current;
-    if (root.current) root.current.position.x = (2 - projOf(s)) * SPREAD;
+    if (!root.current) return;
+    const rx = (2 - projOf(s)) * SPREAD;
+    root.current.position.x = rx;
+    if (Math.abs(rx) > 12) return; // fully offscreen — skip the choreography
     const l = localOf(s, 2);
     const now = clock.elapsedTime;
     const gather = smooth(0.1, 0.98, l); // fully seated by the stage-1 snap point
-    blades.current.forEach((b, i) => {
-      if (!b) return;
+    for (let i = 0; i < blades.current.length; i++) {
+      const b = blades.current[i];
+      if (!b) continue;
       const sc = SCATTER[i], f = finals[i];
       const drift = (1 - gather) * Math.sin(now * 0.7 + i * 1.3) * 0.1;
       b.position.set(
@@ -494,7 +516,7 @@ export function K8sScene({ sRef, pal }: { sRef: React.RefObject<number>; pal: Pa
       );
       b.rotation.z = (1 - gather) * (i % 2 ? 0.35 : -0.3);
       b.rotation.x = (1 - gather) * (i % 3 ? -0.2 : 0.25);
-    });
+    }
     const hubIn = smooth(1.05, 1.35, l);
     const linked = smooth(1.3, 1.85, l);
     if (hub.current) {

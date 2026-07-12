@@ -36,7 +36,12 @@ function StageSpring({ targetRef, sRef }: { targetRef: React.RefObject<number>; 
     // stiffness/damping tuned for "resistance, then glide": settles in
     // ~0.7s with a whisper of overshoot so the snap feels physical.
     vel.current = vel.current * Math.exp(-9.2 * dt) + (t - x) * 46 * dt;
-    sRef.current = x + vel.current * dt;
+    let next = x + vel.current * dt;
+    // hard bounds: a fast flick to either end must not swish past the
+    // first/last scene and slowly crawl back
+    if (next < 0) { next = 0; vel.current = 0; }
+    if (next > STAGES - 1) { next = STAGES - 1; vel.current = 0; }
+    sRef.current = next;
   });
   return null;
 }
