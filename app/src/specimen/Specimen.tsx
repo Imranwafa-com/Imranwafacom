@@ -462,30 +462,28 @@ function Dashboard({ tagFilter, onSelectTag }: DashboardProps) {
 }
 
 // ── Featured showcase — lazy 3D chunk (three.js stays out of
-// the main bundle, like the /resume reader). The wrapper
-// reserves the full scroll height up front so later sections'
-// cached offsets don't shift when the chunk lands.
+// the main bundle, like the /resume reader). The chunk mounts at
+// page load — NOT on scroll-into-view — so the scenes are always
+// booted by the time anyone reaches them; visibility only gates
+// the render loop (inside Showcase). The wrapper reserves the
+// full scroll height so nothing shifts while the chunk streams in.
 const Showcase = lazy(() => import("./showcase/Showcase"));
+
+function ShowcaseFallback() {
+  return (
+    <div className="showcase-loading" role="status" aria-live="polite">
+      <span className="showcase-loading-line" aria-hidden="true" />
+      <span>Loading interactive hardware scene…</span>
+    </div>
+  );
+}
+
 function ShowcaseMount() {
-  const ref = useRef<HTMLDivElement | null>(null);
-  // Reduced motion renders the short static fallback, which has no height
-  // reservation — mount it immediately so the late content injection
-  // happens at load, not mid-scroll.
-  const [on, setOn] = useState(REDUCED);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || REDUCED) return;
-    const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { setOn(true); io.disconnect(); }
-    }, { rootMargin: "1500px" });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
   return (
     // 300vh/project: enough scroll span that PageDown/Space (~90vh) lands
     // on every phase instead of skipping past one.
-    <div ref={ref} style={REDUCED ? undefined : { height: `${3 * 300}vh` }}>
-      {on && <Suspense fallback={null}><Showcase /></Suspense>}
+    <div style={REDUCED ? undefined : { height: `${3 * 300}vh` }}>
+      <Suspense fallback={<ShowcaseFallback />}><Showcase /></Suspense>
     </div>
   );
 }

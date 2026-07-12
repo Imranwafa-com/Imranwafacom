@@ -209,9 +209,9 @@ export const COPY = {
           ["Rebuild", "Bare metal → one command"],
         ] as [string, string][],
         phases: [
-          { h: "A pile of blades.", body: "Separate compute blades, each too small to matter on its own. Individually they're spare parts — the point was never the hardware." },
-          { h: "One machine.", body: "Kubernetes joins them into a single cluster: one pool of CPU, memory, and storage that schedules whatever I throw at it." },
-          { h: "Rebuildable from zero.", body: "Terraform provisions it and the manifests declare it. A rebuild from bare metal is a command, not a weekend — that's the infrastructure-as-code part." },
+          { h: "Every part, in the open.", body: "Mainboard, CPU, RAM, GPUs, NVMe storage, and power float apart before anything becomes a node. The hardware is legible because every piece has a job." },
+          { h: "One node, assembled.", body: "The parts seat into one serviceable compute blade: status live, and one complete worker ready to join the pool." },
+          { h: "One Kubernetes stack.", body: "Six nodes lock into a single cluster. Kubernetes lights the control plane, which schedules workloads across the six nodes; Terraform can rebuild it from zero." },
         ],
       },
     ],

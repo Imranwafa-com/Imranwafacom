@@ -2,58 +2,53 @@
 // Showcase — pinned scroll-driven 3D scenes for the top three
 // personal projects. See scenes.tsx for the 3D side.
 //
-// Scroll model: the section maps to 9 discrete STAGES (3 projects
-// × 3 phases). Raw scroll picks a *target* stage with hysteresis,
-// and a slightly-underdamped spring eases the displayed value
-// toward it — so scrolling has a bit of resistance on each stage,
-// then glides to the next instead of tracking the thumb 1:1.
+// Scroll model: the section maps to 9 STAGES (3 projects × 3
+// phases). Raw scroll drags a magnetic target between stage stops,
+// and monotonic damping eases the displayed value toward it — so
+// motion resists, glides, then settles without overshoot.
 // Native scrolling is never hijacked.
 //
 // Scroll-perf: offsets are cached (measure on width-resize only),
 // the scroll listener is arithmetic + ref writes, and React state
 // changes only on the 9 discrete stage transitions.
 // ════════════════════════════════════════════════════════════
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { COPY } from "../copy";
 import { REDUCED } from "../motion";
-import { currentTheme, THEME_EVENT } from "../theme";
+import { THEME_EVENT } from "../theme";
 import {
-  Ambience, HomelabScene, RackMotionScene, K8sScene,
-  makePalette, STAGES, type Palette,
+  Ambience, CameraRig, HomelabScene, RackMotionScene, K8sScene,
+  makePalette, type Palette,
 } from "./scenes";
+import {
+  STAGES, dampStage, magnetizeStagePosition, panelSideForStage,
+  scrollStagePosition, stageFromScroll,
+} from "./choreography";
 
 const SC = COPY.showcase;
-const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 
-// ── Spring-damped stage driver ──────────────────────────────
-// One spring for everything: scenes read sRef each frame.
-function StageSpring({ targetRef, sRef }: { targetRef: React.RefObject<number>; sRef: React.RefObject<number> }) {
-  const vel = useRef(0);
+// ── Damped stage driver ─────────────────────────────────────
+// One monotonic value for everything: scenes read sRef each frame.
+function StageDriver({ targetRef, sRef }: { targetRef: React.RefObject<number>; sRef: React.RefObject<number> }) {
+  const initialized = useRef(false);
   useFrame((_, delta) => {
-    const dt = Math.min(delta, 0.05);
-    const x = sRef.current, t = targetRef.current;
-    // stiffness/damping tuned for "resistance, then glide": settles in
-    // ~0.7s with a whisper of overshoot so the snap feels physical.
-    vel.current = vel.current * Math.exp(-9.2 * dt) + (t - x) * 46 * dt;
-    let next = x + vel.current * dt;
-    // hard bounds: a fast flick to either end must not swish past the
-    // first/last scene and slowly crawl back
-    if (next < 0) { next = 0; vel.current = 0; }
-    if (next > STAGES - 1) { next = STAGES - 1; vel.current = 0; }
-    sRef.current = next;
+    if (!initialized.current) {
+      initialized.current = true;
+      sRef.current = targetRef.current;
+      return;
+    }
+    sRef.current = dampStage(sRef.current, targetRef.current, delta);
   });
   return null;
 }
 
-function SceneRoot({ targetRef, theme }: { targetRef: React.RefObject<number>; theme: string }) {
-  const sRef = useRef(targetRef.current);
-  // resolveRGB probes the DOM — one read at mount, refreshed per theme flip.
-  const [pal, setPal] = useState<Palette>(makePalette);
-  useEffect(() => { setPal(makePalette()); }, [theme]);
+function SceneRoot({ targetRef, pal }: { targetRef: React.RefObject<number>; pal: Palette }) {
+  const sRef = useRef(0);
   return (
     <>
-      <StageSpring targetRef={targetRef} sRef={sRef} />
+      <StageDriver targetRef={targetRef} sRef={sRef} />
+      <CameraRig sRef={sRef} />
       <Ambience pal={pal} />
       <HomelabScene sRef={sRef} pal={pal} />
       <RackMotionScene sRef={sRef} pal={pal} />
@@ -85,41 +80,49 @@ function StaticShowcase() {
 // ── Live showcase — sticky viewport + stage-snap canvas ─────
 function LiveShowcase() {
   const wrapRef = useRef<HTMLDivElement | null>(null);
-  const targetRef = useRef(0); // integer stage 0..8
-  const [phaseKey, setPhaseKey] = useState(0); // mirrors targetRef for the panel
-  const [vis, setVis] = useState(false);
-  const [booted, setBooted] = useState(false); // latches true on first visibility
-  const [theme, setThemeS] = useState(currentTheme());
+  const targetRef = useRef(0); // continuous magnetic position 0..8
+  const [phaseKey, setPhaseKey] = useState(0); // committed stage for the panel
+  const [vis, setVis] = useState(() => typeof IntersectionObserver === "undefined");
+  const [pal, setPal] = useState<Palette>(makePalette);
+  const [canvasReady, setCanvasReady] = useState(false);
 
   useEffect(() => {
     const on = (e: Event) => {
       const d = (e as CustomEvent<string>).detail;
-      if (d === "paper" || d === "carbon") setThemeS(d);
+      if (d === "paper" || d === "carbon") setPal(makePalette());
     };
     window.addEventListener(THEME_EVENT, on);
     return () => window.removeEventListener(THEME_EVENT, on);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
     // Cached-offset pattern (see motion.tsx): measure on width-resize only,
-    // the scroll handler is pure arithmetic + a ref write. setState fires
-    // only on the discrete stage transitions.
-    let top = 0, span = 1, lastKey = -1, lastW = window.innerWidth;
+    // the scroll handler is arithmetic, a ref write, and one short settle
+    // timer. React state changes only on the discrete stage transitions.
+    let top = 0, span = 1, lastKey = -1, lastW = window.innerWidth, settleTimer = 0, active = true;
     const measure = () => {
       const r = el.getBoundingClientRect();
       top = (window.scrollY || 0) + r.top;
       span = Math.max(1, el.offsetHeight - window.innerHeight);
     };
     const onScroll = () => {
-      const raw = clamp01(((window.scrollY || 0) - top) / span) * (STAGES - 0.0001);
+      const raw = scrollStagePosition(window.scrollY || 0, top, span);
+      targetRef.current = magnetizeStagePosition(raw);
       // Hysteresis: hold the current stage until scroll clearly commits
-      // past the midpoint — the "little bit of resistance".
-      const t = targetRef.current;
-      if (Math.abs(raw - t) > 0.58) targetRef.current = Math.max(0, Math.min(STAGES - 1, Math.round(raw)));
-      const k = targetRef.current;
+      // past the midpoint. This changes only the copy; the 3D target keeps
+      // dragging continuously between the magnetic stage stops.
+      const k = Math.abs(raw - lastKey) > 0.58
+        ? Math.max(0, Math.min(STAGES - 1, Math.round(raw)))
+        : lastKey;
       if (k !== lastKey) { lastKey = k; setPhaseKey(k); }
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        const settled = stageFromScroll(window.scrollY || 0, top, span);
+        targetRef.current = settled;
+        if (settled !== lastKey) { lastKey = settled; setPhaseKey(settled); }
+      }, 160);
     };
     // iOS fires resize when the address bar collapses mid-scroll — only
     // re-measure on width changes so rect reads stay off the scroll path.
@@ -128,27 +131,43 @@ function LiveShowcase() {
       lastW = window.innerWidth;
       measure(); onScroll();
     };
-    measure();
-    // initial: land exactly on the stage under the current scroll position
-    targetRef.current = Math.max(0, Math.min(STAGES - 1, Math.round(clamp01(((window.scrollY || 0) - top) / span) * (STAGES - 0.0001))));
-    setPhaseKey(targetRef.current);
-    lastKey = targetRef.current;
+    const seed = () => {
+      // Seed motion and copy from the restored scroll position.
+      const stage = stageFromScroll(window.scrollY || 0, top, span);
+      targetRef.current = magnetizeStagePosition(scrollStagePosition(window.scrollY || 0, top, span));
+      lastKey = stage;
+      setPhaseKey(stage);
+    };
+    measure(); seed();
+    // The component now mounts at page load, long before layout settles —
+    // fonts, charts, and lazy content above all shift our document offset.
+    // Re-measure once everything is loaded, and again each time the
+    // section approaches the viewport (IO fires well before pinning).
+    const remeasure = () => { if (active) { measure(); onScroll(); } };
+    window.addEventListener("load", remeasure);
+    document.fonts?.ready.then(remeasure).catch(() => {});
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
-    const io = new IntersectionObserver(([e]) => {
+    const io = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) remeasure();
       setVis(e.isIntersecting);
-      if (e.isIntersecting) setBooted(true);
     }, { rootMargin: "50% 0px" });
-    io.observe(el);
+    io?.observe(el);
     return () => {
+      active = false;
+      window.removeEventListener("load", remeasure);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
-      io.disconnect();
+      window.clearTimeout(settleTimer);
+      io?.disconnect();
     };
   }, []);
 
   const proj = SC.projects[Math.floor(phaseKey / 3)];
   const phase = proj.phases[phaseKey % 3];
+  // Copy stays on one side for each project so phase changes do not
+  // throw a large block of text across the viewport.
+  const side = panelSideForStage(phaseKey);
 
   return (
     // 100%: fills the fixed-height reservation made by ShowcaseMount
@@ -156,7 +175,7 @@ function LiveShowcase() {
       <div className="sc-sticky">
         {/* the panel node stays mounted (screen readers keep their place);
             only the changed text blocks are keyed to re-run the fade */}
-        <div className="sc-panel">
+        <div className={"sc-panel " + side}>
           <div className="sc-fade" key={proj.kicker}>
             <div className="sc-kicker mono">{proj.kicker}</div>
             <h3 className="sc-title serif">{proj.title}</h3>
@@ -175,15 +194,15 @@ function LiveShowcase() {
           </div>
           <div className="sc-hint mono">{SC.hint}</div>
         </div>
-        {/* Canvas stays mounted once visible — unmounting kills the WebGL
-            context and remount jank lands mid-scroll. frameloop pauses it. */}
+        {/* Canvas mounts with the page — never lazily on scroll — so the
+            scenes are always ready. Visibility only pauses the loop. */}
         <div className="sc-stage" aria-hidden="true">
-          {booted && (
-            <Canvas dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }} camera={{ position: [0, 0.9, 9.4], fov: 38 }}
-              frameloop={vis ? "always" : "never"}>
-              <SceneRoot targetRef={targetRef} theme={theme} />
-            </Canvas>
-          )}
+          {!canvasReady && <div className="sc-webgl-fallback">Interactive 3D is unavailable on this device.</div>}
+          <Canvas dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }} camera={{ position: [-2, 1.1, 9.2], fov: 40 }}
+            frameloop={vis ? "always" : "demand"}
+            onCreated={() => setCanvasReady(true)}>
+            <SceneRoot targetRef={targetRef} pal={pal} />
+          </Canvas>
         </div>
       </div>
     </div>
