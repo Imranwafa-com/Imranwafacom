@@ -107,7 +107,9 @@ html, body {
   font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  /* clip, not hidden: hidden makes body a scroll container, which breaks
+     position:sticky (the pinned project showcase). clip only clips. */
+  overflow-x: clip;
 }
 
 /* ───── Cursor-tracked gradient on accent text ─────────────
@@ -167,6 +169,87 @@ html.lenis, html.lenis body { height: auto; }
   inset: 0;
   z-index: 0;
   pointer-events: none;
+}
+
+/* On phones in paper (light) mode the scroll/tap-lit grid sits right behind
+   the copy at full strength and washes it out — dim the whole canvas.
+   Carbon reads fine, leave it untouched. */
+@media (max-width: 640px) {
+  html:not([data-theme="carbon"]) .bg-canvas { opacity: 0.3; }
+}
+
+/* ── Featured project showcase (pinned 3D scenes) ─────────── */
+.showcase { position: relative; }
+.sc-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  align-items: center;
+  gap: 32px;
+  z-index: 2;
+}
+.sc-stage { position: relative; height: min(78vh, 720px); }
+.sc-stage canvas { display: block; }
+.sc-panel { max-width: 44ch; animation: scFade 0.45s ease both; }
+@keyframes scFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.sc-kicker {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.sc-title {
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  margin: 0 0 18px;
+}
+.sc-phase-h { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.sc-phase-body { font-size: 14px; line-height: 1.65; color: var(--ink-2); margin: 0 0 20px; }
+.sc-specs { border-top: 1px solid var(--rule); }
+.sc-specs .row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 12px;
+}
+.sc-specs .row span:first-child { color: var(--ink-3); }
+.sc-steps { display: flex; gap: 6px; margin-top: 18px; }
+.sc-step {
+  width: 22px;
+  height: 2px;
+  background: var(--rule);
+  transition: background 0.3s ease;
+}
+.sc-step.on { background: var(--accent); }
+.sc-hint {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+  margin-top: 14px;
+}
+.showcase-static { display: grid; gap: 40px; padding: 24px 0 48px; }
+@media (max-width: 880px) {
+  .sc-sticky {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 44vh) auto;
+    align-items: start;
+    gap: 8px;
+    padding-top: 12px;
+  }
+  .sc-stage { height: 42vh; order: -1; }
+  .sc-panel { max-width: none; }
+  .sc-title { margin-bottom: 10px; }
+  .sc-phase-body { margin-bottom: 12px; }
 }
 
 /* Subtle paper texture using SVG noise */

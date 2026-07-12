@@ -3,7 +3,7 @@
 // Single-page editorial/engineering-monograph portfolio.
 // Composition ported from the Claude Design handoff (app.jsx).
 // ============================================================
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
@@ -461,6 +461,30 @@ function Dashboard({ tagFilter, onSelectTag }: DashboardProps) {
   );
 }
 
+// ── Featured showcase — lazy 3D chunk (three.js stays out of
+// the main bundle, like the /resume reader). The wrapper
+// reserves the full scroll height up front so later sections'
+// cached offsets don't shift when the chunk lands.
+const Showcase = lazy(() => import("./showcase/Showcase"));
+function ShowcaseMount() {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setOn(true); io.disconnect(); }
+    }, { rootMargin: "1500px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div ref={ref} style={REDUCED ? undefined : { height: `${3 * 260}vh` }}>
+      {on && <Suspense fallback={null}><Showcase /></Suspense>}
+    </div>
+  );
+}
+
 // ── Projects — interactive index table ──────────────────────
 function projVal(p: Project, key: string): string | number {
   switch (key) {
@@ -517,7 +541,13 @@ function ProjectIndex({ tagFilter, onClearFilter }: ProjectIndexProps) {
           segments={COPY.sections.work.title}
           meta={tpl(COPY.work.metaTemplate, { shown: sorted.length, total: PROJECTS.length, commits: TOTALS.commits })}
         />
+      </ZoomScroll>
 
+      {/* Pinned 3D showcase for the top three projects — kept outside
+          ZoomScroll: a scaling ancestor fights position:sticky. */}
+      <ShowcaseMount />
+
+      <ZoomScroll as="div" from={0.84}>
         <div className="proj-summary">
           <div className="proj-summary-l">
             <TypeOnView
