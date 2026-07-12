@@ -12,7 +12,7 @@
 // grid, dust, glow wash) that stays put while the hardware swishes
 // through it.
 // ════════════════════════════════════════════════════════════
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { resolveRGB } from "../bg";
@@ -93,8 +93,14 @@ function Box({ size, color, position, rotation, metalness = 0.6, roughness = 0.4
   );
 }
 
-// A soft radial-gradient texture (glow / contact shadow), built once.
+// A soft radial-gradient texture (glow / contact shadow). Cached at
+// module level — a handful of variants ever exist, shared by all
+// users and never disposed, so theme flips can't leak GPU textures.
+const texCache = new Map<string, THREE.Texture>();
 function radialTexture(inner: string, outer: string): THREE.Texture {
+  const key = inner + "|" + outer;
+  const hit = texCache.get(key);
+  if (hit) return hit;
   const cv = document.createElement("canvas");
   cv.width = cv.height = 128;
   const g = cv.getContext("2d")!;
@@ -105,6 +111,7 @@ function radialTexture(inner: string, outer: string): THREE.Texture {
   g.fillRect(0, 0, 128, 128);
   const tx = new THREE.CanvasTexture(cv);
   tx.needsUpdate = true;
+  texCache.set(key, tx);
   return tx;
 }
 
@@ -249,10 +256,15 @@ export function ServerRack({ accent, openRefs, scale = 1 }: { accent: THREE.Colo
 export function Ambience({ pal }: { pal: Palette }) {
   const { scene } = useThree();
   const pts = useRef<THREE.Points>(null);
+  const grid = useRef<THREE.GridHelper>(null);
+  useEffect(() => {
+    const m = grid.current?.material as THREE.Material | undefined;
+    if (m) { m.transparent = true; m.opacity = pal.dark ? 0.12 : 0.18; }
+  }, [pal]);
   // fog matching the page background — hardware fades into the paper
-  useMemo(() => {
+  useEffect(() => {
     scene.fog = new THREE.Fog(pal.bg, 11, 24);
-    return null;
+    return () => { scene.fog = null; };
   }, [scene, pal]);
   const positions = useMemo(() => {
     const a = new Float32Array(160 * 3);
@@ -280,10 +292,10 @@ export function Ambience({ pal }: { pal: Palette }) {
       {/* frontal fill so bezels and faces read instead of silhouetting */}
       <directionalLight position={[0, 2, 12]} intensity={pal.dark ? 1.5 : 0.7} />
       <directionalLight position={[-6, 4, -4]} intensity={0.7} color={pal.accent} />
-      {/* floor grid — kept small + faint so the horizon melts into fog */}
-      <gridHelper args={[34, 34]} position={[0, -1.44, 0]}>
-        <lineBasicMaterial color={pal.faint} transparent opacity={pal.dark ? 0.12 : 0.18} />
-      </gridHelper>
+      {/* floor grid — kept small + faint so the horizon melts into fog.
+          Colors go through args (a material child would leak the helper's
+          own material); opacity is set on the built-in material below. */}
+      <gridHelper ref={grid} args={[34, 34, pal.faint, pal.faint]} position={[0, -1.44, 0]} />
       {/* soft accent wash behind the stage — kept smaller than the view
           so the gradient dies out before the canvas edge shows a seam */}
       <mesh position={[1, 1.2, -5]} scale={[13, 8, 1]}>
@@ -470,7 +482,7 @@ export function K8sScene({ sRef, pal }: { sRef: React.RefObject<number>; pal: Pa
     if (root.current) root.current.position.x = (2 - projOf(s)) * SPREAD;
     const l = localOf(s, 2);
     const now = clock.elapsedTime;
-    const gather = smooth(0.1, 1.1, l);
+    const gather = smooth(0.1, 0.98, l); // fully seated by the stage-1 snap point
     blades.current.forEach((b, i) => {
       if (!b) return;
       const sc = SCATTER[i], f = finals[i];

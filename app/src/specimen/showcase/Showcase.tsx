@@ -35,8 +35,7 @@ function StageSpring({ targetRef, sRef }: { targetRef: React.RefObject<number>; 
     const x = sRef.current, t = targetRef.current;
     // stiffness/damping tuned for "resistance, then glide": settles in
     // ~0.7s with a whisper of overshoot so the snap feels physical.
-    vel.current += (t - x) * 46 * dt;
-    vel.current *= Math.exp(-9.2 * dt);
+    vel.current = vel.current * Math.exp(-9.2 * dt) + (t - x) * 46 * dt;
     sRef.current = x + vel.current * dt;
   });
   return null;
