@@ -190,8 +190,9 @@ function RackMotionScene({ pRef, pal }: { pRef: React.RefObject<number>; pal: Pa
   const fig = useRef<THREE.Group>(null);
   const lock = useRef<THREE.Group>(null);
   const shackle = useRef<THREE.Group>(null);
+  // No dispose-on-unmount: StrictMode remounts would render a disposed
+  // material (useMemo keeps the instance). Leaking one material is benign.
   const figMat = useMemo(() => new THREE.MeshBasicMaterial({ color: pal.red, wireframe: true, transparent: true, opacity: 0.9 }), [pal]);
-  useEffect(() => () => figMat.dispose(), [figMat]);
   useFrame(({ clock }) => {
     const p = pRef.current;
     if (root.current) root.current.position.x = (1 - easedProj(p)) * SPREAD;
@@ -259,7 +260,6 @@ function K8sScene({ pRef, pal }: { pRef: React.RefObject<number>; pal: Palette }
     g.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
     return g;
   }, [finals]);
-  useEffect(() => () => linkGeo.dispose(), [linkGeo]);
   useFrame(({ clock }) => {
     const p = pRef.current;
     if (root.current) root.current.position.x = (2 - easedProj(p)) * SPREAD;
@@ -346,7 +346,10 @@ function LiveShowcase() {
   const [theme, setThemeS] = useState(currentTheme());
 
   useEffect(() => {
-    const on = (e: Event) => setThemeS((e as CustomEvent<string>).detail as "paper" | "carbon");
+    const on = (e: Event) => {
+      const d = (e as CustomEvent<string>).detail;
+      if (d === "paper" || d === "carbon") setThemeS(d);
+    };
     window.addEventListener(THEME_EVENT, on);
     return () => window.removeEventListener(THEME_EVENT, on);
   }, []);
