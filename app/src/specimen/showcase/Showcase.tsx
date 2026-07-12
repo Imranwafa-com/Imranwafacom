@@ -22,7 +22,7 @@ import {
   makePalette, type Palette,
 } from "./scenes";
 import {
-  STAGES, dampStage, magnetizeStagePosition, panelSideForStage,
+  STAGES, dampStage, magnetizeStagePosition, panelPlacementForStage,
   scrollStagePosition, stageFromScroll,
 } from "./choreography";
 
@@ -165,9 +165,7 @@ function LiveShowcase() {
 
   const proj = SC.projects[Math.floor(phaseKey / 3)];
   const phase = proj.phases[phaseKey % 3];
-  // Copy stays on one side for each project so phase changes do not
-  // throw a large block of text across the viewport.
-  const side = panelSideForStage(phaseKey);
+  const placement = panelPlacementForStage(phaseKey);
 
   return (
     // 100%: fills the fixed-height reservation made by ShowcaseMount
@@ -175,7 +173,7 @@ function LiveShowcase() {
       <div className="sc-sticky">
         {/* the panel node stays mounted (screen readers keep their place);
             only the changed text blocks are keyed to re-run the fade */}
-        <div className={"sc-panel " + side}>
+        <div className={"sc-panel " + placement}>
           <div className="sc-fade" key={proj.kicker}>
             <div className="sc-kicker mono">{proj.kicker}</div>
             <h3 className="sc-title serif">{proj.title}</h3>

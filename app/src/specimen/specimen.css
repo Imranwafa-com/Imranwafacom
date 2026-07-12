@@ -198,21 +198,36 @@ html.lenis, html.lenis body { height: auto; }
 .sc-panel {
   position: absolute;
   z-index: 2;
-  top: 50%;
-  transform: translateY(-50%);
+  top: clamp(64px, 10dvh, 104px);
   width: var(--sc-panel-w);
   left: var(--sc-gutter);
-  transition: left 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+  padding: clamp(16px, 2vw, 24px);
+  border: 1px solid var(--rule);
+  background: color-mix(in oklab, var(--paper) 94%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 .sc-panel.side-r { left: calc(100vw - var(--sc-gutter) - var(--sc-panel-w)); right: auto; }
+.sc-panel.side-t {
+  top: clamp(20px, 4dvh, 48px);
+  left: 50%;
+  width: min(64ch, calc(100vw - 48px));
+  transform: translateX(-50%);
+}
+.sc-panel.side-t .sc-specs { display: none; }
 .sc-panel.side-l .sc-fade { animation: scFadeL 0.65s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
 .sc-panel.side-r .sc-fade { animation: scFadeR 0.65s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+.sc-panel.side-t .sc-fade { animation: scFadeT 0.65s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
 @keyframes scFadeL {
   from { opacity: 0; transform: translate(-10px, 6px); }
   to { opacity: 1; transform: none; }
 }
 @keyframes scFadeR {
   from { opacity: 0; transform: translate(10px, 6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes scFadeT {
+  from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: none; }
 }
 .sc-kicker {
@@ -305,28 +320,63 @@ html.lenis, html.lenis body { height: auto; }
   letter-spacing: 0.08em;
 }
 @media (max-width: 880px), (orientation: portrait) and (max-width: 1100px) {
-  /* Phones: the scene fills the screen; the text rides a translucent
-     bottom sheet so it stays readable over the 3D. */
-  .sc-panel,
-  .sc-panel.side-r {
+  /* The scene and copy get separate cells, so neither can obscure the other. */
+  .sc-sticky .sc-stage { bottom: 48dvh; }
+  .sc-sticky .sc-panel,
+  .sc-sticky .sc-panel.side-r,
+  .sc-sticky .sc-panel.side-t {
     top: auto;
-    bottom: max(16px, env(safe-area-inset-bottom));
-    left: 12px;
-    right: 12px;
-    width: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 48dvh;
     transform: none;
-    max-height: 46vh;
+    max-height: none;
     overflow-y: auto;
-    padding: 16px 16px 12px;
-    border: 1px solid var(--rule);
-    border-radius: 14px;
-    background: color-mix(in oklab, var(--paper) 82%, transparent);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    transition: none;
+    padding: 14px max(16px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    border: 0;
+    border-top: 1px solid var(--rule);
+    background: var(--paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .sc-sticky .sc-panel.side-t .sc-specs,
+  .sc-sticky .sc-specs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
   }
   .sc-title { margin-bottom: 10px; }
   .sc-phase-body { margin-bottom: 12px; }
+}
+
+@media (max-height: 520px) and (orientation: landscape) and (pointer: coarse) {
+  .sc-sticky .sc-stage { right: 42vw; bottom: 0; }
+  .sc-sticky .sc-panel,
+  .sc-sticky .sc-panel.side-r,
+  .sc-sticky .sc-panel.side-t {
+    top: 0;
+    bottom: 0;
+    left: auto;
+    right: 0;
+    width: 42vw;
+    height: 100dvh;
+    transform: none;
+    overflow-y: auto;
+    padding: max(14px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) 16px;
+    background: var(--paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border: 0;
+    border-left: 1px solid var(--rule);
+  }
+  .sc-sticky .sc-panel.side-t .sc-specs,
+  .sc-sticky .sc-specs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+  }
 }
 
 /* Subtle paper texture using SVG noise */

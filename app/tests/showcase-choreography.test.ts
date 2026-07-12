@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  SHOWCASE_HEIGHT_VH,
   STAGES,
   TRIP_X,
   clusterTimelineAt,
   dampStage,
   magnetizeStagePosition,
-  panelSideForStage,
+  panelPlacementForStage,
+  partRepulsionAt,
   portraitCameraScale,
   rackMotionAt,
   stageFromScroll,
@@ -74,14 +76,29 @@ test("compute assembles one node before gathering the stack", () => {
   assert.equal(clusterTimelineAt(2).linked, 1);
 });
 
-test("copy stays put within each project and portrait cameras pull back", () => {
-  assert.equal(panelSideForStage(0), "side-l");
-  assert.equal(panelSideForStage(1), "side-l");
-  assert.equal(panelSideForStage(2), "side-l");
-  assert.equal(panelSideForStage(3), "side-r");
-  assert.equal(panelSideForStage(5), "side-r");
-  assert.equal(panelSideForStage(6), "side-l");
-  assert.equal(panelSideForStage(8), "side-l");
+test("copy follows the authored stage composition and the scroll span stays compact", () => {
+  assert.deepEqual(Array.from({ length: STAGES }, (_, stage) => panelPlacementForStage(stage)), [
+    "side-l", "side-r", "side-l", "side-t", "side-l", "side-r", "side-l", "side-t", "side-l",
+  ]);
+  assert.equal(SHOWCASE_HEIGHT_VH, 780);
+  assert.equal((SHOWCASE_HEIGHT_VH - 100) / STAGES, 680 / 9);
+});
+
+test("exploded parts move away from a nearby fine pointer without accumulating force", () => {
+  assert.deepEqual(partRepulsionAt(2, 0, 0, 0, 0), [0, 0]);
+  assert.deepEqual(partRepulsionAt(2, 0, 0, 0, 1), [0, 0]);
+
+  const right = partRepulsionAt(0.5, 0, 0, 0, 1);
+  const left = partRepulsionAt(-0.5, 0, 0, 0, 1);
+  const half = partRepulsionAt(0.5, 0, 0, 0, 0.5);
+  assert.ok(right[0] > 0);
+  assert.ok(left[0] < 0);
+  assert.equal(half[0], right[0] * 0.5);
+  assert.deepEqual(partRepulsionAt(0, 0, 0, 0, 1), [0, 0]);
+  assert.ok(Math.hypot(...right) <= 0.5);
+});
+
+test("portrait cameras pull back", () => {
   assert.equal(portraitCameraScale(1_280, 720), 1);
   assert.ok(portraitCameraScale(390, 844) > 1.3);
 });

@@ -18,7 +18,7 @@ import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { resolveRGB } from "../bg";
 import {
-  STAGES, TRIP_X, clamp, clusterTimelineAt, portraitCameraScale,
+  STAGES, TRIP_X, clamp, clusterTimelineAt, partRepulsionAt, portraitCameraScale,
   rackMotionAt, smooth,
 } from "./choreography";
 
@@ -680,7 +680,11 @@ const SCATTER: [number, number, number][] = [
   [0, 0, 0], // slot taken by the assembled node
   [-3.6, 0.9, 0.3], [2.6, -1.1, -0.6],
 ];
+const POINTER_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+const POINTER_HIT = new THREE.Vector3();
+const POINTER_LOCAL = new THREE.Vector3();
 export function K8sScene({ sRef, pal }: { sRef: React.RefObject<number>; pal: Palette }) {
+  const { pointer, camera, raycaster, gl } = useThree();
   const root = useRef<THREE.Group>(null);
   const node = useRef<THREE.Group>(null);
   const nodeLid = useRef<THREE.Group>(null);
@@ -691,6 +695,9 @@ export function K8sScene({ sRef, pal }: { sRef: React.RefObject<number>; pal: Pa
   const hubRotor = useRef<THREE.Group>(null);
   const core = useRef<THREE.MeshStandardMaterial>(null);
   const linkMat = useRef<THREE.LineBasicMaterial>(null);
+  const finePointer = useMemo(() =>
+    typeof window !== "undefined" && window.matchMedia("(hover: hover) and (pointer: fine)").matches,
+  []);
   const finals = useMemo(() => Array.from({ length: BLADES }, (_, i): [number, number, number] => [STACK_X, -0.75 + i * 0.4, 0]), []);
   const linkGeo = useMemo(() => {
     const pts: number[] = [];
@@ -709,17 +716,30 @@ export function K8sScene({ sRef, pal }: { sRef: React.RefObject<number>; pal: Pa
     const l = localOf(s, 2);
     const now = clock.elapsedTime;
     const timeline = clusterTimelineAt(l);
+    let repelPointer: THREE.Vector3 | null = null;
+    if (finePointer && timeline.labelOpacity > 0 && node.current && gl.domElement.matches(":hover")) {
+      camera.updateMatrixWorld();
+      raycaster.setFromCamera(pointer, camera);
+      if (raycaster.ray.intersectPlane(POINTER_PLANE, POINTER_HIT)) {
+        node.current.updateWorldMatrix(true, false);
+        POINTER_LOCAL.copy(POINTER_HIT);
+        node.current.worldToLocal(POINTER_LOCAL);
+        repelPointer = POINTER_LOCAL;
+      }
+    }
     // stage 0→1: exploded parts drift, then fly into the chassis
     for (let i = 0; i < parts.current.length; i++) {
       const p = parts.current[i];
       if (!p) continue;
       const spec = PARTS[i];
       const drift = (1 - timeline.assemble) * Math.sin(now * 0.6 + i * 1.9) * 0.06;
-      p.position.set(
-        spec.exp[0] + (spec.seat[0] - spec.exp[0]) * timeline.assemble,
-        spec.exp[1] + (spec.seat[1] - spec.exp[1]) * timeline.assemble + drift,
-        spec.exp[2] + (spec.seat[2] - spec.exp[2]) * timeline.assemble,
-      );
+      const x = spec.exp[0] + (spec.seat[0] - spec.exp[0]) * timeline.assemble;
+      const y = spec.exp[1] + (spec.seat[1] - spec.exp[1]) * timeline.assemble;
+      const z = spec.exp[2] + (spec.seat[2] - spec.exp[2]) * timeline.assemble;
+      const [repelX, repelY] = repelPointer
+        ? partRepulsionAt(x, y, repelPointer.x, repelPointer.y, timeline.labelOpacity)
+        : [0, 0];
+      p.position.set(x + repelX, y + drift + repelY, z);
       p.rotation.set(spec.rot[0] * (1 - timeline.assemble), spec.rot[1] * (1 - timeline.assemble) + (1 - timeline.assemble) * now * 0.06, spec.rot[2] * (1 - timeline.assemble));
       p.scale.setScalar(1 + (1 - timeline.assemble) * 0.18);
       const label = partLabels.current[i];

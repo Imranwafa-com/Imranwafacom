@@ -1,4 +1,5 @@
 export const STAGES = 9;
+export const SHOWCASE_HEIGHT_VH = 780;
 export const TRIP_X = -1.7;
 
 export const clamp = (x: number, min: number, max: number) => Math.max(min, Math.min(max, x));
@@ -30,8 +31,31 @@ export function magnetizeStagePosition(position: number) {
 export const dampStage = (current: number, target: number, delta: number) =>
   current + (target - current) * (1 - Math.exp(-4.2 * Math.min(delta, 0.05)));
 
-export const panelSideForStage = (stage: number) =>
-  Math.floor(clamp(stage, 0, STAGES - 1) / 3) % 2 ? "side-r" : "side-l";
+const PANEL_PLACEMENTS = [
+  "side-l", "side-r", "side-l", "side-t", "side-l", "side-r", "side-l", "side-t", "side-l",
+] as const;
+
+export const panelPlacementForStage = (stage: number) =>
+  PANEL_PLACEMENTS[Math.round(clamp(stage, 0, STAGES - 1))];
+
+const REPEL_RADIUS = 1.35;
+const REPEL_PUSH = 0.5;
+
+export function partRepulsionAt(
+  partX: number,
+  partY: number,
+  pointerX: number,
+  pointerY: number,
+  amount: number,
+) {
+  const dx = partX - pointerX;
+  const dy = partY - pointerY;
+  const distance = Math.hypot(dx, dy);
+  if (amount <= 0 || distance < 1e-6 || distance >= REPEL_RADIUS) return [0, 0] as const;
+
+  const push = REPEL_PUSH * (1 - distance / REPEL_RADIUS) ** 2 * clamp01(amount) / distance;
+  return [dx * push, dy * push] as const;
+}
 
 export function rackMotionAt(local: number) {
   const enter = smooth(0.05, 0.85, local);

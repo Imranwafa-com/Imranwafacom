@@ -29,6 +29,7 @@ import { QuirksExtra } from "./quirks-extra";
 import { Tap, MicroToast, emitTap } from "./microtaps";
 import { tpl } from "./utils";
 import { fireRipple } from "./runtime";
+import { SHOWCASE_HEIGHT_VH } from "./showcase/choreography";
 import { COPY, type MetaBlock as MetaBlockT, type DossierRow as DossierRowT } from "./copy";
 import {
   PROJECTS, TOTALS, LANG_DIST, STACK_USAGE, SHIP_TREND, TAG_WEIGHTS, SKILLS, CONTACTS,
@@ -480,9 +481,8 @@ function ShowcaseFallback() {
 
 function ShowcaseMount() {
   return (
-    // 300vh/project: enough scroll span that PageDown/Space (~90vh) lands
-    // on every phase instead of skipping past one.
-    <div style={REDUCED ? undefined : { height: `${3 * 300}vh` }}>
+    // Nine compact stops: enough room to settle, without long empty drags.
+    <div style={REDUCED ? undefined : { height: `${SHOWCASE_HEIGHT_VH}vh` }}>
       <Suspense fallback={<ShowcaseFallback />}><Showcase /></Suspense>
     </div>
   );
