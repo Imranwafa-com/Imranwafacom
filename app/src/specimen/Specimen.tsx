@@ -468,10 +468,13 @@ function Dashboard({ tagFilter, onSelectTag }: DashboardProps) {
 const Showcase = lazy(() => import("./showcase/Showcase"));
 function ShowcaseMount() {
   const ref = useRef<HTMLDivElement | null>(null);
-  const [on, setOn] = useState(false);
+  // Reduced motion renders the short static fallback, which has no height
+  // reservation — mount it immediately so the late content injection
+  // happens at load, not mid-scroll.
+  const [on, setOn] = useState(REDUCED);
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || REDUCED) return;
     const io = new IntersectionObserver(([e]) => {
       if (e.isIntersecting) { setOn(true); io.disconnect(); }
     }, { rootMargin: "1500px" });
@@ -479,7 +482,9 @@ function ShowcaseMount() {
     return () => io.disconnect();
   }, []);
   return (
-    <div ref={ref} style={REDUCED ? undefined : { height: `${3 * 260}vh` }}>
+    // 300vh/project: enough scroll span that PageDown/Space (~90vh) lands
+    // on every phase instead of skipping past one.
+    <div ref={ref} style={REDUCED ? undefined : { height: `${3 * 300}vh` }}>
       {on && <Suspense fallback={null}><Showcase /></Suspense>}
     </div>
   );

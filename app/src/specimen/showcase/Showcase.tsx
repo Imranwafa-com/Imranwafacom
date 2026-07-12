@@ -69,10 +69,12 @@ interface SlabProps {
 function Slab({ size, color, edge, opacity = 0.07, edgeOpacity = 0.85, position }: SlabProps) {
   return (
     <group position={position} scale={size}>
-      <mesh geometry={UNIT_BOX}>
+      {/* dispose={null}: the unit geometries are shared module-level —
+          R3F must not dispose them when a slab unmounts */}
+      <mesh geometry={UNIT_BOX} dispose={null}>
         <meshBasicMaterial color={color} transparent opacity={opacity} depthWrite={false} />
       </mesh>
-      <lineSegments geometry={UNIT_EDGES}>
+      <lineSegments geometry={UNIT_EDGES} dispose={null}>
         <lineBasicMaterial color={edge} transparent opacity={edgeOpacity} />
       </lineSegments>
     </group>
@@ -340,6 +342,7 @@ function LiveShowcase() {
   const pRef = useRef(0); // overall progress, 0..N
   const [phaseKey, setPhaseKey] = useState(0); // project*3 + phase
   const [vis, setVis] = useState(false);
+  const [booted, setBooted] = useState(false); // latches true on first visibility
   const [theme, setThemeS] = useState(currentTheme());
 
   useEffect(() => {
@@ -380,7 +383,10 @@ function LiveShowcase() {
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
     // Mount the canvas a bit before it scrolls into view; unmount far away.
-    const io = new IntersectionObserver(([e]) => setVis(e.isIntersecting), { rootMargin: "50% 0px" });
+    const io = new IntersectionObserver(([e]) => {
+      setVis(e.isIntersecting);
+      if (e.isIntersecting) setBooted(true);
+    }, { rootMargin: "50% 0px" });
     io.observe(el);
     return () => {
       window.removeEventListener("scroll", onScroll);
@@ -396,22 +402,33 @@ function LiveShowcase() {
     // 100%: fills the fixed-height reservation made by ShowcaseMount
     <div className="showcase" ref={wrapRef} style={{ height: "100%" }}>
       <div className="sc-sticky">
-        <div className="sc-panel" key={phaseKey}>
-          <div className="sc-kicker mono">{proj.kicker}</div>
-          <h3 className="sc-title serif">{proj.title}</h3>
-          <div className="sc-phase-h">{phase.h}</div>
-          <p className="sc-phase-body">{phase.body}</p>
-          <div className="sc-specs">
-            {proj.specs.map(([k, v]) => <div className="row" key={k}><span>{k}</span><span>{v}</span></div>)}
+        {/* the panel node stays mounted (screen readers keep their place);
+            only the changed text blocks are keyed to re-run the fade */}
+        <div className="sc-panel">
+          <div className="sc-fade" key={proj.kicker}>
+            <div className="sc-kicker mono">{proj.kicker}</div>
+            <h3 className="sc-title serif">{proj.title}</h3>
+          </div>
+          <div className="sc-fade" key={phaseKey}>
+            <div className="sc-phase-h">{phase.h}</div>
+            <p className="sc-phase-body">{phase.body}</p>
+          </div>
+          <div className="sc-fade" key={proj.kicker + "s"}>
+            <div className="sc-specs">
+              {proj.specs.map(([k, v]) => <div className="row" key={k}><span>{k}</span><span>{v}</span></div>)}
+            </div>
           </div>
           <div className="sc-steps" aria-hidden="true">
             {[0, 1, 2].map((s) => <span key={s} className={"sc-step" + (s === phaseKey % 3 ? " on" : "")} />)}
           </div>
           <div className="sc-hint mono">{SC.hint}</div>
         </div>
+        {/* Canvas stays mounted once visible — unmounting kills the WebGL
+            context and remount jank lands mid-scroll. frameloop pauses it. */}
         <div className="sc-stage" aria-hidden="true">
-          {vis && (
-            <Canvas dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }} camera={{ position: [0, 1.4, 8.8], fov: 38 }}>
+          {booted && (
+            <Canvas dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }} camera={{ position: [0, 1.4, 8.8], fov: 38 }}
+              frameloop={vis ? "always" : "never"}>
               <SceneRoot pRef={pRef} theme={theme} />
             </Canvas>
           )}

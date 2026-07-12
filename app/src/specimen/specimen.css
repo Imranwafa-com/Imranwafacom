@@ -174,7 +174,7 @@ html.lenis, html.lenis body { height: auto; }
 /* On phones in paper (light) mode the scroll/tap-lit grid sits right behind
    the copy at full strength and washes it out — dim the whole canvas.
    Carbon reads fine, leave it untouched. */
-@media (max-width: 640px) {
+@media (max-width: 880px) {
   html:not([data-theme="carbon"]) .bg-canvas { opacity: 0.3; }
 }
 
@@ -193,7 +193,8 @@ html.lenis, html.lenis body { height: auto; }
 }
 .sc-stage { position: relative; height: min(78vh, 720px); }
 .sc-stage canvas { display: block; }
-.sc-panel { max-width: 44ch; animation: scFade 0.45s ease both; }
+.sc-panel { max-width: 44ch; }
+.sc-fade { animation: scFade 0.45s ease both; }
 @keyframes scFade {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
