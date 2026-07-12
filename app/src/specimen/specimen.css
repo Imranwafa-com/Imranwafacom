@@ -248,7 +248,9 @@ html.lenis, html.lenis body { height: auto; }
     padding-top: 12px;
   }
   .sc-stage { height: 42vh; order: -1; }
-  .sc-panel { max-width: none; }
+  /* longest phase copy + specs can outgrow small phones — let the
+     panel scroll inside the sticky viewport instead of clipping */
+  .sc-panel { max-width: none; overflow-y: auto; min-height: 0; padding-bottom: 24px; }
   .sc-title { margin-bottom: 10px; }
   .sc-phase-body { margin-bottom: 12px; }
 }

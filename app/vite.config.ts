@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => {
               // Three.js stack only loads with the lazy Showcase chunk —
               // must match before the generic 'react' check or
               // @react-three/fiber lands in the eager vendor-react chunk.
-              if (id.includes('/three/') || id.includes('@react-three')) {
+              if (id.includes('node_modules/three/') || id.includes('@react-three')) {
                 return 'vendor-three';
               }
               if (id.includes('recharts') || id.includes('d3') || id.includes('react-resize-detector')) {
