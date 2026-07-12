@@ -35,9 +35,11 @@ const smooth = (a: number, b: number, x: number) => {
 // Local phase progress (0..1) for scene i, given overall p (0..N).
 const localT = (p: number, i: number) => clamp01((p - i) / HOLD);
 // Continuous "which scene" value: hold on i, then slide to i+1.
+// Clamped to N-1 so the last scene holds instead of swishing out
+// while the section is still pinned.
 const easedProj = (p: number) => {
   const i = Math.min(N - 1, Math.floor(p));
-  return i + smooth(HOLD, 1, p - i);
+  return Math.min(N - 1, i + smooth(HOLD, 1, p - i));
 };
 
 // ── Theme-reactive colors (resolved from the CSS tokens) ────
@@ -53,6 +55,9 @@ function makePalette(): Palette {
 }
 
 // ── Box with visible edges — the whole aesthetic is built on it ──
+// One shared unit cube for every slab; per-instance size via scale.
+const UNIT_BOX = new THREE.BoxGeometry(1, 1, 1);
+const UNIT_EDGES = new THREE.EdgesGeometry(UNIT_BOX);
 interface SlabProps {
   size: [number, number, number];
   color: THREE.Color;
@@ -62,15 +67,12 @@ interface SlabProps {
   position?: [number, number, number];
 }
 function Slab({ size, color, edge, opacity = 0.07, edgeOpacity = 0.85, position }: SlabProps) {
-  const geo = useMemo(() => new THREE.BoxGeometry(...size), [size]);
-  const edges = useMemo(() => new THREE.EdgesGeometry(geo), [geo]);
-  useEffect(() => () => { geo.dispose(); edges.dispose(); }, [geo, edges]);
   return (
-    <group position={position}>
-      <mesh geometry={geo}>
+    <group position={position} scale={size}>
+      <mesh geometry={UNIT_BOX}>
         <meshBasicMaterial color={color} transparent opacity={opacity} depthWrite={false} />
       </mesh>
-      <lineSegments geometry={edges}>
+      <lineSegments geometry={UNIT_EDGES}>
         <lineBasicMaterial color={edge} transparent opacity={edgeOpacity} />
       </lineSegments>
     </group>
@@ -300,7 +302,9 @@ function K8sScene({ pRef, pal }: { pRef: React.RefObject<number>; pal: Palette }
 }
 
 function SceneRoot({ pRef, theme }: { pRef: React.RefObject<number>; theme: string }) {
-  const pal = useMemo(() => makePalette(), [theme]); // eslint-disable-line react-hooks/exhaustive-deps
+  // resolveRGB probes the DOM — keep it out of the render phase.
+  const [pal, setPal] = useState<Palette>(makePalette);
+  useEffect(() => { setPal(makePalette()); }, [theme]);
   return (
     <>
       <HomelabScene pRef={pRef} pal={pal} />
@@ -350,7 +354,7 @@ function LiveShowcase() {
     // Cached-offset pattern (see motion.tsx): measure on resize only,
     // the scroll handler is pure arithmetic + a ref write. setState
     // fires only on the 9 discrete phase boundaries.
-    let top = 0, span = 1;
+    let top = 0, span = 1, lastKey = -1, lastW = window.innerWidth;
     const measure = () => {
       const r = el.getBoundingClientRect();
       top = (window.scrollY || 0) + r.top;
@@ -359,11 +363,19 @@ function LiveShowcase() {
     const onScroll = () => {
       const p = clamp01(((window.scrollY || 0) - top) / span) * (N - 0.0001);
       pRef.current = p;
-      const i = Math.floor(p);
+      // Panel flips to the next project at the swish midpoint, not at the
+      // unit boundary — otherwise the text lags the scene sliding in.
+      const i = Math.min(N - 1, Math.floor(p + (1 - HOLD) / 2));
       const k = i * 3 + Math.min(2, Math.floor(localT(p, i) * 3));
-      setPhaseKey((prev) => (prev === k ? prev : k));
+      if (k !== lastKey) { lastKey = k; setPhaseKey(k); }
     };
-    const onResize = () => { measure(); onScroll(); };
+    // iOS fires resize when the address bar collapses mid-scroll — only
+    // re-measure on width changes so rect reads stay off the scroll path.
+    const onResize = () => {
+      if (window.innerWidth === lastW) return;
+      lastW = window.innerWidth;
+      measure(); onScroll();
+    };
     measure(); onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
@@ -381,7 +393,8 @@ function LiveShowcase() {
   const phase = proj.phases[phaseKey % 3];
 
   return (
-    <div className="showcase" ref={wrapRef} style={{ height: `${N * 260}vh` }}>
+    // 100%: fills the fixed-height reservation made by ShowcaseMount
+    <div className="showcase" ref={wrapRef} style={{ height: "100%" }}>
       <div className="sc-sticky">
         <div className="sc-panel" key={phaseKey}>
           <div className="sc-kicker mono">{proj.kicker}</div>
