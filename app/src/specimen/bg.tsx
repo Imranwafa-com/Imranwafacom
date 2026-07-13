@@ -10,12 +10,12 @@
 import { useEffect, useRef } from "react";
 import { setRippleFn } from "./runtime";
 
-type RGB = [number, number, number];
+export type RGB = [number, number, number];
 interface Dot { bx: number; by: number; x: number; y: number; vx: number; vy: number; lit: number; breathe: number }
 interface WakePoint { x: number; y: number; t0: number; vx: number; vy: number }
 interface Ripple { x: number; y: number; t0: number }
 
-function resolveRGB(varName: string, fallback: RGB): RGB {
+export function resolveRGB(varName: string, fallback: RGB): RGB {
   try {
     const raw = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
     if (!raw) return fallback;

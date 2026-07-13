@@ -3,7 +3,7 @@
 // Single-page editorial/engineering-monograph portfolio.
 // Composition ported from the Claude Design handoff (app.jsx).
 // ============================================================
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
@@ -29,6 +29,7 @@ import { QuirksExtra } from "./quirks-extra";
 import { Tap, MicroToast, emitTap } from "./microtaps";
 import { tpl } from "./utils";
 import { fireRipple } from "./runtime";
+import { SHOWCASE_HEIGHT_VH } from "./showcase/choreography";
 import { COPY, type MetaBlock as MetaBlockT, type DossierRow as DossierRowT } from "./copy";
 import {
   PROJECTS, TOTALS, LANG_DIST, STACK_USAGE, SHIP_TREND, TAG_WEIGHTS, SKILLS, CONTACTS,
@@ -461,6 +462,32 @@ function Dashboard({ tagFilter, onSelectTag }: DashboardProps) {
   );
 }
 
+// ── Featured showcase — lazy 3D chunk (three.js stays out of
+// the main bundle, like the /resume reader). The chunk mounts at
+// page load — NOT on scroll-into-view — so the scenes are always
+// booted by the time anyone reaches them; visibility only gates
+// the render loop (inside Showcase). The wrapper reserves the
+// full scroll height so nothing shifts while the chunk streams in.
+const Showcase = lazy(() => import("./showcase/Showcase"));
+
+function ShowcaseFallback() {
+  return (
+    <div className="showcase-loading" role="status" aria-live="polite">
+      <span className="showcase-loading-line" aria-hidden="true" />
+      <span>Loading interactive hardware scene…</span>
+    </div>
+  );
+}
+
+function ShowcaseMount() {
+  return (
+    // Nine compact stops: enough room to settle, without long empty drags.
+    <div style={REDUCED ? undefined : { height: `${SHOWCASE_HEIGHT_VH}vh` }}>
+      <Suspense fallback={<ShowcaseFallback />}><Showcase /></Suspense>
+    </div>
+  );
+}
+
 // ── Projects — interactive index table ──────────────────────
 function projVal(p: Project, key: string): string | number {
   switch (key) {
@@ -517,7 +544,13 @@ function ProjectIndex({ tagFilter, onClearFilter }: ProjectIndexProps) {
           segments={COPY.sections.work.title}
           meta={tpl(COPY.work.metaTemplate, { shown: sorted.length, total: PROJECTS.length, commits: TOTALS.commits })}
         />
+      </ZoomScroll>
 
+      {/* Pinned 3D showcase for the top three projects — kept outside
+          ZoomScroll: a scaling ancestor fights position:sticky. */}
+      <ShowcaseMount />
+
+      <ZoomScroll as="div" from={0.84}>
         <div className="proj-summary">
           <div className="proj-summary-l">
             <TypeOnView

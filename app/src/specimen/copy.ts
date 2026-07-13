@@ -164,6 +164,59 @@ export const COPY = {
     detail: { year: "Year", type: "Type", status: "Status", stack: "Stack", loc: "LoC", commits: "Commits", files: "Files", link: "View source ↗" },
   },
 
+  // ── Featured project showcase (pinned 3D scenes, top 3) ───
+  showcase: {
+    hint: "SCROLL — THE SCENE ADVANCES",
+    projects: [
+      {
+        kicker: "FEATURED 01 · HOMELAB / INFRA",
+        title: "The home lab.",
+        specs: [
+          ["Hypervisor", "Proxmox VE"],
+          ["Memory", "1.5 TB RAM"],
+          ["GPU", "4× NVIDIA V100 · local LLMs"],
+          ["Provisioning", "Terraform + Ansible"],
+          ["Security", "VLANs · hardened access"],
+        ] as [string, string][],
+        phases: [
+          { h: "The rack.", body: "Proxmox VE on a full rack: 1.5 TB of RAM, four NVIDIA V100s, and every VM and container the lab runs. This is where anything I build gets tested before it touches something that matters." },
+          { h: "One node, on rails.", body: "Slide a node out and everything is serviceable: compute, storage, and the GPU box that handles local LLM inference. Hardware problems get fixed at the rack, not debugged in software." },
+          { h: "Provisioned as code.", body: "Inside: four V100s for LLM work, ZFS-backed storage, segmented VLANs. All of it declared in Terraform and Ansible — the whole lab rebuilds from a repo, not from memory." },
+        ],
+      },
+      {
+        kicker: "FEATURED 02 · HOMELAB / SECURITY",
+        title: "Rack Motion.",
+        specs: [
+          ["Detection", "Camera + motion tracking"],
+          ["Stack", "Python · OpenCV"],
+          ["Trigger", "~10 ft from the rack"],
+          ["Response", "Lockdown + alert + log"],
+        ] as [string, string][],
+        phases: [
+          { h: "Someone walks in.", body: "A camera watches the room. Motion detection picks up a person the moment they enter and starts tracking their path — every entry becomes an event with a timestamp." },
+          { h: "Tracked and flagged.", body: "The figure is followed frame to frame and flagged red. The system doesn't care who you say you are — only what the camera sees near the lab." },
+          { h: "Ten feet out, it locks.", body: "Close within range of the rack and it locks down: access shut, alert fired, footage kept. It answers one question — who touched my servers — with logs to prove it." },
+        ],
+      },
+      {
+        kicker: "FEATURED 03 · HOMELAB / COMPUTE",
+        title: "Compute cluster.",
+        specs: [
+          ["Orchestration", "Kubernetes"],
+          ["Hardware", "Compute blades · one pool"],
+          ["IaC", "Terraform + declarative manifests"],
+          ["Rebuild", "Bare metal → one command"],
+        ] as [string, string][],
+        phases: [
+          { h: "Every part, in the open.", body: "Mainboard, CPU, RAM, GPUs, NVMe storage, and power float apart before anything becomes a node. The hardware is legible because every piece has a job." },
+          { h: "One node, assembled.", body: "The parts seat into one serviceable compute blade: status live, and one complete worker ready to join the pool." },
+          { h: "One Kubernetes stack.", body: "Six nodes lock into a single cluster. Kubernetes lights the control plane, which schedules workloads across the six nodes; Terraform can rebuild it from zero." },
+        ],
+      },
+    ],
+  },
+
   // ── Work projects (NDA'd — shown as a redacted manifest) ──
   workProjects: {
     title: [{ text: "Client & " }, { text: "team work.", className: "it" }] as Seg[],
